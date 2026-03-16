@@ -2,42 +2,55 @@ import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend, CartesianGrid } from "recharts";
 
 // ── DATA ──
-const T = 21987, days = 25;
-const groupA = { resolved: 2511, closed: 7604, get total() { return this.resolved + this.closed; } };
-const groupB = { immediate: 10884, voluntary: 393, kbMiss: 328, linguistic: 40, get total() { return this.immediate + this.voluntary + this.kbMiss + this.linguistic; } };
-const abandoned = 223;
-const intCalls = 10880;
-const dailyVol = Math.round(T / days);
-const dailyManaged = Math.round(groupA.total / days);
+const T = 21599, days = 25;
+const gA = { resolved: 1898, closed: 4121, get total() { return this.resolved + this.closed; } };
+const gB = { immediate: 10136, postReply: 2938, kbMiss: 1333, linguistic: 899, get total() { return this.immediate + this.postReply + this.kbMiss + this.linguistic; } };
+const abandoned = 274;
+const botReplied = 8679, botNoReply = 12919;
+const pertinent = 6895, notPertinent = 1844;
+const totalKbMiss = 3717;
+const recoverable = 4271;
+const dailyVol = Math.round(T / days), dailyManaged = Math.round(gA.total / days);
+const savedH = ((dailyManaged * 3.5) / 60).toFixed(1);
+const fte = ((dailyManaged * 3.5) / 60 / 8).toFixed(1);
+const userChoice = gB.immediate + gB.postReply;
+const systemLimit = gB.kbMiss + gB.linguistic;
 const fmt = (n) => typeof n === "number" ? n.toLocaleString("it-IT") : n;
-
-// Derived
-const caso1 = groupB.voluntary; // bot answered, user still wants operator
-const caso2 = groupB.kbMiss + groupB.linguistic; // bot couldn't answer
-const caso3 = groupB.immediate; // user wants operator without trying
+const pct = (a, b) => ((a / b) * 100).toFixed(1);
 
 const successIntents = [
-  { name: "Offerte/Promozioni", managed: 88, total: 145 },
-  { name: "Disponibilità prodotto", managed: 1365, total: 3250 },
-  { name: "Info negozio", managed: 116, total: 422 },
-  { name: "Stato ordine", managed: 319, total: 1443 },
-  { name: "Prezzo prodotto", managed: 70, total: 450 },
-  { name: "Assistenza tecnica", managed: 68, total: 906 },
-].map(i => ({ ...i, pct: Math.round((i.managed / i.total) * 100), transferred: i.total - i.managed }));
+  { name: "Prezzo prodotto", managed: 322, total: 388 },
+  { name: "Offerte/Promozioni", managed: 146, total: 201 },
+  { name: "Disponibilità", managed: 1912, total: 2641 },
+  { name: "Info prodotto", managed: 685, total: 1046 },
+  { name: "Stato ordine", managed: 929, total: 1459 },
+  { name: "Info pagamento", managed: 134, total: 235 },
+  { name: "Info negozio", managed: 313, total: 619 },
+  { name: "Consegna/Modifica", managed: 104, total: 238 },
+  { name: "Assistenza tecnica", managed: 337, total: 1570 },
+].map(i => ({ ...i, pct: Math.round((i.managed / i.total) * 100), transferred: i.total - i.managed })).sort((a, b) => b.pct - a.pct);
 
 const products = [
-  { name: "Lavatrice", v: 539 }, { name: "TV/Televisore", v: 257 },
-  { name: "Frigorifero", v: 247 }, { name: "Telefono", v: 213 },
-  { name: "Lavastoviglie", v: 138 }, { name: "Computer", v: 99 },
+  { name: "Lavatrice", v: 330 }, { name: "Telefono", v: 138 }, { name: "Televisore", v: 107 },
+  { name: "Computer", v: 104 }, { name: "Lavastoviglie", v: 96 }, { name: "TV", v: 90 },
+  { name: "Frigorifero", v: 83 }, { name: "Elettrodomestici", v: 72 }, { name: "Asciugatrice", v: 43 },
 ];
 
-const tagIssues = [
-  { old: "Fallimento sistema", new: "Conversazione chiusa dall'utente", desc: "L'utente ha interagito, poi ha chiuso senza chiedere operatore. Non è un errore del bot.", count: 7604, impact: "Da negativo a neutro/positivo" },
-  { old: "Non compreso", new: "Disaggregare in sottocategorie", desc: "Include: silenzi, fuori catalogo, interruzioni. Non sempre indica un limite del bot.", count: null, impact: "Da negativo a misto" },
-  { old: "Trasferimento volontario", new: "Scelta utente post-risposta", desc: "Il bot ha risposto correttamente, l'utente preferisce comunque l'operatore.", count: 393, impact: "Da negativo a neutro" },
+const operatorBreakdown = [
+  { name: "Senza motivo", v: 6683, pct: 62.5 },
+  { name: "Punto vendita", v: 1635, pct: 15.3 },
+  { name: "Persona specifica", v: 1384, pct: 12.9 },
+  { name: "Con motivo esplicito", v: 971, pct: 9.1 },
 ];
 
-const CustomTooltip = ({ active, payload, label }) => {
+const abandonDetail = [
+  { name: "Conversazione vuota", v: 141 },
+  { name: "Saluto senza richiesta", v: 103 },
+  { name: "Interruzione precoce", v: 23 },
+  { name: "Silenzio", v: 6 },
+];
+
+const CT = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: "#161b22", border: "1px solid #30363d", borderRadius: "8px", padding: "10px 14px", fontSize: "12px", fontFamily: "'JetBrains Mono', monospace" }}>
@@ -66,21 +79,21 @@ function Num({ value, label, sub, color = "#58a6ff" }) {
 function Insight({ color = "#58a6ff", children }) {
   return <div style={{ padding: "16px 18px", background: color + "0a", borderRadius: "10px", borderLeft: `3px solid ${color}`, fontSize: "13px", color: "#8b949e", lineHeight: 1.65 }}>{children}</div>;
 }
-function SectionTitle({ children, sub }) {
+function Stitle({ children, sub }) {
   return (
     <div style={{ marginBottom: "16px" }}>
-      <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#e6edf3", margin: 0, fontFamily: "'IBM Plex Sans', sans-serif" }}>{children}</h2>
+      <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#e6edf3", margin: 0 }}>{children}</h2>
       {sub && <p style={{ fontSize: "12px", color: "#484f58", margin: "4px 0 0" }}>{sub}</p>}
     </div>
   );
 }
 
 const tabs = [
-  { id: "quadro", label: "1. Quadro generale" },
-  { id: "gestite", label: "2. Gestite dal bot" },
-  { id: "trasferite", label: "3. Trasferite" },
-  { id: "tag", label: "4. Riclassificazione" },
-  { id: "domanda", label: "5. Domanda al cliente" },
+  { id: "quadro", label: "1. Quadro" },
+  { id: "qualita", label: "2. Qualità risposte" },
+  { id: "gestite", label: "3. Dove eccelle" },
+  { id: "trasferite", label: "4. Trasferimenti" },
+  { id: "domanda", label: "5. Prossimi passi" },
 ];
 
 export default function App() {
@@ -93,16 +106,16 @@ export default function App() {
       {/* HEADER */}
       <div style={{ background: "#0d1117", borderBottom: "1px solid #21262d", padding: "32px 20px 24px" }}>
         <div style={{ maxWidth: "980px", margin: "0 auto" }}>
-          <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
-            {["DIMO · EURONICS", "17 FEB – 13 MAR 2026", "25 GIORNI"].map((t, i) => (
+          <div style={{ display: "flex", gap: "8px", marginBottom: "10px", flexWrap: "wrap" }}>
+            {["DIMO · EURONICS", "17 FEB – 13 MAR 2026", "25 GIORNI", `${fmt(T)} CONVERSAZIONI`].map((t, i) => (
               <span key={i} style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: i === 0 ? "#58a6ff" : "#484f58", background: i === 0 ? "#58a6ff12" : "#161b22", padding: "3px 8px", borderRadius: "4px", letterSpacing: "1.5px" }}>{t}</span>
             ))}
           </div>
-          <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "clamp(20px, 3.5vw, 28px)", fontWeight: 700, margin: 0, color: "#e6edf3", lineHeight: 1.3 }}>
+          <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "clamp(18px, 3.5vw, 26px)", fontWeight: 700, margin: 0, color: "#e6edf3", lineHeight: 1.3 }}>
             Analisi comportamento Voicebot
           </h1>
-          <p style={{ fontSize: "14px", color: "#484f58", margin: "6px 0 0", maxWidth: "700px", lineHeight: 1.5 }}>
-            {fmt(T)} conversazioni analizzate. L'obiettivo non è solo mostrare i dati, ma guidare la lettura dei risultati e definire insieme i prossimi passi.
+          <p style={{ fontSize: "13px", color: "#484f58", margin: "6px 0 0", maxWidth: "700px", lineHeight: 1.5 }}>
+            Il bot risponde in modo pertinente nel <strong style={{ color: "#3fb950" }}>79,4%</strong> dei casi. Il <strong style={{ color: "#58a6ff" }}>72%</strong> delle richieste su disponibilità prodotto viene gestito senza operatore. Ci sono <strong style={{ color: "#d29922" }}>{fmt(recoverable)}</strong> conversazioni recuperabili.
           </p>
         </div>
       </div>
@@ -115,7 +128,7 @@ export default function App() {
               flex: 1, padding: "10px 6px", border: "none", borderRadius: "8px", cursor: "pointer",
               fontFamily: "'IBM Plex Sans', sans-serif", fontSize: "11px", fontWeight: tab === t.id ? 600 : 400,
               color: tab === t.id ? "#010409" : "#484f58", background: tab === t.id ? "#58a6ff" : "transparent",
-              transition: "all 0.2s", whiteSpace: "nowrap", minWidth: 0,
+              transition: "all 0.2s", whiteSpace: "nowrap",
             }}>{t.label}</button>
           ))}
         </div>
@@ -123,126 +136,199 @@ export default function App() {
 
       <div style={{ maxWidth: "980px", margin: "24px auto 0", padding: "0 16px 48px" }}>
 
-        {/* ═══ 1. QUADRO GENERALE ═══ */}
+        {/* ═══ 1. QUADRO ═══ */}
         {tab === "quadro" && (
           <div>
-            <SectionTitle sub="Divisione principale delle conversazioni in due gruppi">Quadro generale: {fmt(T)} conversazioni</SectionTitle>
+            <Stitle sub="Divisione principale delle conversazioni">Quadro generale</Stitle>
 
-            {/* Main split visualization */}
             <Card style={{ marginBottom: "16px" }}>
-              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "16px" }}>Come si distribuiscono le conversazioni</div>
-              <ResponsiveContainer width="100%" height={100}>
-                <BarChart data={[{ a: groupA.total, b: groupB.total, c: abandoned }]} layout="vertical" margin={{ left: 0, right: 0 }}>
+              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "16px" }}>Distribuzione delle {fmt(T)} conversazioni</div>
+              <ResponsiveContainer width="100%" height={80}>
+                <BarChart data={[{ a: gA.total, b: gB.total, c: abandoned }]} layout="vertical" margin={{ left: 0, right: 0 }}>
                   <XAxis type="number" hide />
                   <YAxis type="category" hide />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="a" name="A. Gestite dal bot" stackId="s" fill="#58a6ff" barSize={40} />
-                  <Bar dataKey="b" name="B. Con trasferimento" stackId="s" fill="#30363d" barSize={40} />
-                  <Bar dataKey="c" name="Abbandono" stackId="s" fill="#161b22" barSize={40} />
+                  <Tooltip content={<CT />} />
+                  <Bar dataKey="a" name="Gestite dal bot" stackId="s" fill="#58a6ff" barSize={36} />
+                  <Bar dataKey="b" name="Trasferite" stackId="s" fill="#30363d" barSize={36} />
+                  <Bar dataKey="c" name="Abbandono" stackId="s" fill="#161b22" barSize={36} />
                 </BarChart>
               </ResponsiveContainer>
-              <div style={{ display: "flex", gap: "24px", marginTop: "12px", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "20px", marginTop: "10px", flexWrap: "wrap" }}>
                 {[
-                  { color: "#58a6ff", label: `A. Gestite dal bot: ${fmt(groupA.total)} (${((groupA.total/T)*100).toFixed(1)}%)` },
-                  { color: "#30363d", label: `B. Con trasferimento: ${fmt(groupB.total)} (${((groupB.total/T)*100).toFixed(1)}%)` },
-                  { color: "#161b22", label: `Abbandono: ${fmt(abandoned)} (${((abandoned/T)*100).toFixed(1)}%)` },
+                  { c: "#58a6ff", l: `Gestite dal bot: ${fmt(gA.total)} (${pct(gA.total, T)}%)` },
+                  { c: "#30363d", l: `Trasferite: ${fmt(gB.total)} (${pct(gB.total, T)}%)` },
+                  { c: "#161b22", l: `Abbandono: ${fmt(abandoned)} (${pct(abandoned, T)}%)` },
                 ].map((l, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: l.color, border: "1px solid #21262d" }} />
-                    <span style={{ fontSize: "12px", color: "#8b949e" }}>{l.label}</span>
+                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: l.c, border: "1px solid #21262d" }} />
+                    <span style={{ fontSize: "12px", color: "#8b949e" }}>{l.l}</span>
                   </div>
                 ))}
               </div>
             </Card>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
-              {/* Gruppo A */}
               <Card style={{ borderTop: "3px solid #58a6ff" }}>
                 <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#58a6ff", letterSpacing: "1.5px", marginBottom: "12px" }}>GRUPPO A — GESTITE DAL BOT</div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "32px", fontWeight: 700, color: "#58a6ff" }}>{fmt(groupA.total)}</div>
-                <div style={{ fontSize: "12px", color: "#8b949e", marginTop: "8px", lineHeight: 1.5 }}>
-                  Il voicebot ha gestito queste conversazioni <strong style={{ color: "#c9d1d9" }}>senza trasferire a un operatore</strong>.
-                </div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "32px", fontWeight: 700, color: "#58a6ff" }}>{fmt(gA.total)}</div>
+                <div style={{ fontSize: "12px", color: "#8b949e", marginTop: "8px", lineHeight: 1.5 }}>Conversazioni gestite <strong style={{ color: "#c9d1d9" }}>senza trasferimento</strong></div>
                 <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
-                    <span style={{ color: "#484f58" }}>Risolte completamente</span>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#3fb950" }}>{fmt(groupA.resolved)}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
-                    <span style={{ color: "#484f58" }}>Chiuse dall'utente dopo interazione</span>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#58a6ff" }}>{fmt(groupA.closed)}</span>
-                  </div>
+                  {[
+                    { l: "Risolte completamente", v: fmt(gA.resolved), c: "#3fb950" },
+                    { l: "Chiuse dall'utente dopo interazione", v: fmt(gA.closed), c: "#58a6ff" },
+                  ].map((r, i) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+                      <span style={{ color: "#484f58" }}>{r.l}</span>
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace", color: r.c }}>{r.v}</span>
+                    </div>
+                  ))}
                 </div>
               </Card>
 
-              {/* Gruppo B */}
               <Card style={{ borderTop: "3px solid #484f58" }}>
-                <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#484f58", letterSpacing: "1.5px", marginBottom: "12px" }}>GRUPPO B — CON TRASFERIMENTO</div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "32px", fontWeight: 700, color: "#8b949e" }}>{fmt(groupB.total)}</div>
+                <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: "#484f58", letterSpacing: "1.5px", marginBottom: "12px" }}>GRUPPO B — TRASFERITE</div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "32px", fontWeight: 700, color: "#8b949e" }}>{fmt(gB.total)}</div>
                 <div style={{ fontSize: "12px", color: "#8b949e", marginTop: "8px", lineHeight: 1.5 }}>
-                  Conversazioni in cui l'utente è stato trasferito a un operatore. <strong style={{ color: "#c9d1d9" }}>Non tutte indicano un errore del bot.</strong>
+                  <strong style={{ color: "#c9d1d9" }}>Non tutte indicano un errore.</strong> L'85,4% è una scelta dell'utente.
                 </div>
                 <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
-                    <span style={{ color: "#484f58" }}>Richiesta immediata (1° turno)</span>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#8b949e" }}>{fmt(groupB.immediate)}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
-                    <span style={{ color: "#484f58" }}>Scelta utente dopo risposta bot</span>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#d29922" }}>{fmt(groupB.voluntary)}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
-                    <span style={{ color: "#484f58" }}>Info mancante in KB</span>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#f85149" }}>{fmt(groupB.kbMiss)}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
-                    <span style={{ color: "#484f58" }}>Incomprensioni linguistiche</span>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#f85149" }}>{fmt(groupB.linguistic)}</span>
-                  </div>
+                  {[
+                    { l: "Richiesta immediata (1° turno)", v: fmt(gB.immediate), c: "#8b949e" },
+                    { l: "Scelta utente dopo risposta bot", v: fmt(gB.postReply), c: "#d29922" },
+                    { l: "Info mancante in KB", v: fmt(gB.kbMiss), c: "#f85149" },
+                    { l: "Incomprensioni linguistiche", v: fmt(gB.linguistic), c: "#f85149" },
+                  ].map((r, i) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+                      <span style={{ color: "#484f58" }}>{r.l}</span>
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace", color: r.c }}>{r.v}</span>
+                    </div>
+                  ))}
                 </div>
               </Card>
             </div>
 
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", marginBottom: "16px" }}>
+              <Num value={fmt(dailyVol)} label="Chiamate/giorno" sub="Media su 25 giorni" color="#8b949e" />
+              <Num value={fmt(dailyManaged)} label="Gestite/giorno dal bot" sub="Senza operatore" color="#58a6ff" />
+              <Num value={`${savedH}h`} label="Ore risparmiate/giorno" sub={`≈ ${fte} FTE`} color="#3fb950" />
+              <Num value={`${pct(abandoned, T)}%`} label="Tasso abbandono" sub={`${fmt(abandoned)} conversazioni`} color="#484f58" />
+            </div>
+
             <Insight color="#58a6ff">
-              <strong style={{ color: "#58a6ff" }}>Lettura chiave:</strong> Il voicebot gestisce il 46% delle conversazioni in completa autonomia. Del 53% trasferito, solo il <strong style={{ color: "#f85149" }}>3,1%</strong> ({fmt(caso2)} chiamate) è dovuto a limiti reali del sistema (KB miss + incomprensioni). Il restante 97% dei trasferimenti è una scelta dell'utente, non un errore del bot.
+              <strong style={{ color: "#58a6ff" }}>Il dato chiave:</strong> dell'{pct(gB.total, T)}% trasferito, solo il <strong style={{ color: "#f85149" }}>{pct(systemLimit, gB.total)}%</strong> ({fmt(systemLimit)} conversazioni) è dovuto a limiti del sistema. L'85,4% è una scelta dell'utente — richiesta diretta di operatore o preferenza umana dopo aver ricevuto risposta.
             </Insight>
           </div>
         )}
 
-        {/* ═══ 2. GESTITE DAL BOT ═══ */}
-        {tab === "gestite" && (
+        {/* ═══ 2. QUALITA RISPOSTE ═══ */}
+        {tab === "qualita" && (
           <div>
-            <SectionTitle sub="Il bot funziona: ecco cosa gestisce con successo">Gruppo A: {fmt(groupA.total)} conversazioni gestite</SectionTitle>
+            <Stitle sub="Quando il bot risponde, risponde bene?">Qualità delle risposte del bot</Stitle>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+              <Card>
+                <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "14px" }}>Il bot ha risposto?</div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie data={[{ name: "Sì, ha risposto", value: botReplied, color: "#58a6ff" }, { name: "No, non ha potuto", value: botNoReply, color: "#21262d" }]} cx="50%" cy="50%" innerRadius={45} outerRadius={80} dataKey="value" stroke="#010409" strokeWidth={2}>
+                      <Cell fill="#58a6ff" /><Cell fill="#21262d" />
+                    </Pie>
+                    <Tooltip content={<CT />} />
+                    <Legend iconType="circle" iconSize={8} formatter={(v) => <span style={{ color: "#8b949e", fontSize: "11px" }}>{v}</span>} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ textAlign: "center", marginTop: "4px" }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "20px", fontWeight: 700, color: "#58a6ff" }}>40,2%</span>
+                  <span style={{ fontSize: "12px", color: "#484f58", marginLeft: "8px" }}>ha ricevuto risposta</span>
+                </div>
+              </Card>
+              <Card>
+                <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "14px" }}>La risposta era pertinente?</div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie data={[{ name: "Pertinente", value: pertinent }, { name: "Non pertinente", value: notPertinent }]} cx="50%" cy="50%" innerRadius={45} outerRadius={80} dataKey="value" stroke="#010409" strokeWidth={2}>
+                      <Cell fill="#3fb950" /><Cell fill="#f85149" />
+                    </Pie>
+                    <Tooltip content={<CT />} />
+                    <Legend iconType="circle" iconSize={8} formatter={(v) => <span style={{ color: "#8b949e", fontSize: "11px" }}>{v}</span>} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ textAlign: "center", marginTop: "4px" }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "20px", fontWeight: 700, color: "#3fb950" }}>79,4%</span>
+                  <span style={{ fontSize: "12px", color: "#484f58", marginLeft: "8px" }}>pertinente</span>
+                </div>
+              </Card>
+            </div>
 
             <Card style={{ marginBottom: "16px" }}>
-              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "4px" }}>Tasso di successo per argomento</div>
-              <div style={{ fontSize: "11px", color: "#484f58", marginBottom: "16px" }}>Percentuale di richieste che il bot risolve senza operatore</div>
-              <ResponsiveContainer width="100%" height={280}>
+              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "14px" }}>Cosa succede quando il bot risponde ({fmt(botReplied)} casi)</div>
+              <ResponsiveContainer width="100%" height={70}>
+                <BarChart data={[{ risolte: gA.resolved, chiuse: gA.closed, trasf: gB.postReply }]} layout="vertical" margin={{ left: 0, right: 0 }}>
+                  <XAxis type="number" hide /><YAxis type="category" hide />
+                  <Tooltip content={<CT />} />
+                  <Bar dataKey="risolte" name="Risolte completamente" stackId="s" fill="#3fb950" barSize={28} />
+                  <Bar dataKey="chiuse" name="Chiuse dall'utente" stackId="s" fill="#58a6ff" barSize={28} />
+                  <Bar dataKey="trasf" name="Utente sceglie operatore" stackId="s" fill="#d29922" barSize={28} />
+                </BarChart>
+              </ResponsiveContainer>
+              <div style={{ display: "flex", gap: "16px", marginTop: "10px", flexWrap: "wrap" }}>
+                {[
+                  { c: "#3fb950", l: `Risolte: ${fmt(gA.resolved)} (${pct(gA.resolved, botReplied)}%)` },
+                  { c: "#58a6ff", l: `Chiuse utente: ${fmt(gA.closed)} (${pct(gA.closed, botReplied)}%)` },
+                  { c: "#d29922", l: `Scelta operatore: ${fmt(gB.postReply)} (${pct(gB.postReply, botReplied)}%)` },
+                ].map((l, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: l.c }} />
+                    <span style={{ fontSize: "11px", color: "#8b949e" }}>{l.l}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", marginBottom: "16px" }}>
+              <Num value={fmt(totalKbMiss)} label="Lacune KB totali" sub="Domande capite ma senza risposta" color="#d29922" />
+              <Num value={fmt(gB.linguistic)} label="Incomprensioni linguistiche" sub={`${pct(gB.linguistic, T)}% del totale`} color="#f85149" />
+              <Num value={fmt(recoverable)} label="Conversazioni recuperabili" sub="KB miss + post risposta bot" color="#58a6ff" />
+            </div>
+
+            <Insight color="#3fb950">
+              <strong style={{ color: "#3fb950" }}>Il bot risponde bene quando può rispondere.</strong> Il 79,4% delle risposte è pertinente. Il problema principale non è la qualità delle risposte ma il volume di utenti che chiedono l'operatore senza interagire (46,9%) e le lacune nella knowledge base ({fmt(totalKbMiss)} casi).
+            </Insight>
+          </div>
+        )}
+
+        {/* ═══ 3. DOVE ECCELLE ═══ */}
+        {tab === "gestite" && (
+          <div>
+            <Stitle sub="Su quali argomenti il bot gestisce meglio le richieste">Tasso di gestione autonoma per argomento</Stitle>
+
+            <Card style={{ marginBottom: "16px" }}>
+              <div style={{ fontSize: "11px", color: "#484f58", marginBottom: "16px" }}>Verde = gestite dal bot · Grigio = trasferite a operatore</div>
+              <ResponsiveContainer width="100%" height={360}>
                 <BarChart data={successIntents} layout="vertical" margin={{ left: 10, right: 16 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#21262d" horizontal={false} />
                   <XAxis type="number" domain={[0, 100]} tick={{ fill: "#484f58", fontSize: 11 }} axisLine={false} tickLine={false} unit="%" />
                   <YAxis type="category" dataKey="name" tick={{ fill: "#8b949e", fontSize: 11 }} width={130} axisLine={false} tickLine={false} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="pct" name="Gestite dal bot" fill="#3fb950" radius={[0, 4, 4, 0]} barSize={18} unit="%" />
+                  <Tooltip content={<CT />} />
+                  <Bar dataKey="pct" name="Gestite dal bot" fill="#3fb950" radius={[0, 4, 4, 0]} barSize={20} unit="%" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", marginBottom: "16px" }}>
-              <Num value="61%" label="Offerte e promozioni" sub="Best performer — 88 su 145" color="#3fb950" />
-              <Num value="42%" label="Disponibilità prodotto" sub="1.365 gestite su 3.250" color="#3fb950" />
-              <Num value="0,18%" label="Errori linguistici" sub="40 su 21.987 — NLU eccellente" color="#3fb950" />
+              <Num value="83%" label="Prezzo prodotto" sub={`${fmt(322)} su ${fmt(388)} gestite`} color="#3fb950" />
+              <Num value="73%" label="Offerte/Promozioni" sub={`${fmt(146)} su ${fmt(201)} gestite`} color="#3fb950" />
+              <Num value="72%" label="Disponibilità" sub={`${fmt(1912)} su ${fmt(2641)} gestite`} color="#3fb950" />
             </div>
 
             <Card style={{ marginBottom: "16px" }}>
-              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "4px" }}>Dettaglio per argomento: gestite vs trasferite</div>
-              <div style={{ fontSize: "11px", color: "#484f58", marginBottom: "16px" }}>La parte verde è gestita dal bot, la grigia è trasferita</div>
-              <ResponsiveContainer width="100%" height={280}>
+              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "14px" }}>Volume gestito vs trasferito per argomento</div>
+              <ResponsiveContainer width="100%" height={360}>
                 <BarChart data={successIntents} layout="vertical" margin={{ left: 10, right: 16 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#21262d" horizontal={false} />
                   <XAxis type="number" tick={{ fill: "#484f58", fontSize: 11 }} axisLine={false} tickLine={false} />
                   <YAxis type="category" dataKey="name" tick={{ fill: "#8b949e", fontSize: 11 }} width={130} axisLine={false} tickLine={false} />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CT />} />
                   <Bar dataKey="managed" name="Gestite dal bot" stackId="a" fill="#3fb950" barSize={18} />
                   <Bar dataKey="transferred" name="Trasferite" stackId="a" fill="#21262d" barSize={18} />
                   <Legend iconType="circle" iconSize={8} formatter={(v) => <span style={{ color: "#8b949e", fontSize: "11px" }}>{v}</span>} />
@@ -251,215 +337,144 @@ export default function App() {
             </Card>
 
             <Insight color="#3fb950">
-              <strong style={{ color: "#3fb950" }}>Il bot gestisce con successo gli argomenti transazionali</strong> — offerte (61%), disponibilità (42%), info negozio (27%). La comprensione vocale è quasi perfetta: solo 40 incomprensioni su quasi 22.000 chiamate. Il sistema funziona.
+              <strong style={{ color: "#3fb950" }}>Il bot eccelle sugli argomenti transazionali.</strong> Prezzo (83%), offerte (73%), disponibilità (72%), info prodotto (65%), stato ordine (64%). Questi sono gli argomenti dove il bot dimostra di funzionare efficacemente e di dare valore reale al servizio.
             </Insight>
           </div>
         )}
 
-        {/* ═══ 3. TRASFERITE ═══ */}
+        {/* ═══ 4. TRASFERIMENTI ═══ */}
         {tab === "trasferite" && (
           <div>
-            <SectionTitle sub="Non tutti i trasferimenti sono errori. Distinguiamo tre casi.">Gruppo B: {fmt(groupB.total)} conversazioni trasferite</SectionTitle>
+            <Stitle sub="Distinguiamo: scelta dell'utente vs limite del sistema">Analisi dei {fmt(gB.total)} trasferimenti</Stitle>
 
-            {/* The 3 cases */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px", marginBottom: "16px" }}>
-              {/* Caso 3 - immediate */}
-              <Card style={{ borderLeft: "4px solid #484f58" }}>
+            {/* 3 blocks */}
+            {[
+              { label: "COMPORTAMENTO UTENTE", title: "Richiesta operatore al primo turno", desc: `L'utente chiede l'operatore senza dare al bot la possibilità di rispondere.`, val: gB.immediate, pctV: pct(gB.immediate, gB.total), col: "#484f58", tag: "46,9% del totale conversazioni" },
+              { label: "SCELTA UTENTE", title: "Bot ha risposto, utente sceglie operatore", desc: `Il bot ha fornito informazioni pertinenti, ma l'utente preferisce comunque l'operatore.`, val: gB.postReply, pctV: pct(gB.postReply, gB.total), col: "#d29922", tag: "Non è un errore del bot" },
+              { label: "LIMITE DEL SISTEMA", title: "Bot non ha saputo rispondere", desc: `KB miss (${fmt(gB.kbMiss)}) + incomprensioni linguistiche (${fmt(gB.linguistic)}). Questi sono i casi su cui intervenire.`, val: systemLimit, pctV: pct(systemLimit, gB.total), col: "#f85149", tag: "Area di miglioramento" },
+            ].map((item, i) => (
+              <Card key={i} style={{ marginBottom: "12px", borderLeft: `4px solid ${item.col}` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px" }}>
-                  <div style={{ flex: 1, minWidth: "280px" }}>
+                  <div style={{ flex: 1, minWidth: "260px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", color: "#484f58", background: "#21262d", padding: "3px 8px", borderRadius: "4px" }}>COMPORTAMENTO UTENTE</span>
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", color: item.col, background: item.col + "15", padding: "3px 8px", borderRadius: "4px", letterSpacing: "0.5px" }}>{item.label}</span>
+                      <span style={{ fontSize: "10px", color: "#484f58" }}>{item.tag}</span>
                     </div>
-                    <div style={{ fontSize: "15px", fontWeight: 700, color: "#e6edf3", marginBottom: "6px" }}>Richiesta operatore al primo turno</div>
-                    <div style={{ fontSize: "12px", color: "#8b949e", lineHeight: 1.6 }}>
-                      L'utente chiede immediatamente di parlare con un operatore, <strong style={{ color: "#c9d1d9" }}>senza dare al bot la possibilità di rispondere</strong>. Non è un errore del sistema — è un comportamento dell'utente.
-                    </div>
+                    <div style={{ fontSize: "15px", fontWeight: 700, color: "#e6edf3", marginBottom: "6px" }}>{item.title}</div>
+                    <div style={{ fontSize: "12px", color: "#8b949e", lineHeight: 1.6 }}>{item.desc}</div>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "28px", fontWeight: 700, color: "#8b949e" }}>{fmt(caso3)}</div>
-                    <div style={{ fontSize: "11px", color: "#484f58" }}>{((caso3 / groupB.total) * 100).toFixed(1)}% dei trasferimenti</div>
+                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "28px", fontWeight: 700, color: item.col }}>{fmt(item.val)}</div>
+                    <div style={{ fontSize: "11px", color: "#484f58" }}>{item.pctV}% dei trasferimenti</div>
                   </div>
                 </div>
               </Card>
+            ))}
 
-              {/* Caso 1 - voluntary */}
-              <Card style={{ borderLeft: "4px solid #d29922" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px" }}>
-                  <div style={{ flex: 1, minWidth: "280px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", color: "#d29922", background: "#d2992215", padding: "3px 8px", borderRadius: "4px" }}>SCELTA UTENTE</span>
-                    </div>
-                    <div style={{ fontSize: "15px", fontWeight: 700, color: "#e6edf3", marginBottom: "6px" }}>Bot ha risposto, utente sceglie operatore</div>
-                    <div style={{ fontSize: "12px", color: "#8b949e", lineHeight: 1.6 }}>
-                      Il bot ha fornito le informazioni richieste, ma l'utente ha comunque chiesto di parlare con un operatore. <strong style={{ color: "#c9d1d9" }}>Non è un errore del bot</strong> — il bot ha fatto il suo lavoro.
-                    </div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "28px", fontWeight: 700, color: "#d29922" }}>{fmt(caso1)}</div>
-                    <div style={{ fontSize: "11px", color: "#484f58" }}>{((caso1 / groupB.total) * 100).toFixed(1)}% dei trasferimenti</div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Caso 2 - real issues */}
-              <Card style={{ borderLeft: "4px solid #f85149" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px" }}>
-                  <div style={{ flex: 1, minWidth: "280px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", color: "#f85149", background: "#f8514915", padding: "3px 8px", borderRadius: "4px" }}>LIMITE DEL SISTEMA</span>
-                    </div>
-                    <div style={{ fontSize: "15px", fontWeight: 700, color: "#e6edf3", marginBottom: "6px" }}>Bot non ha saputo rispondere</div>
-                    <div style={{ fontSize: "12px", color: "#8b949e", lineHeight: 1.6 }}>
-                      Il bot non aveva l'informazione (KB miss: {fmt(groupB.kbMiss)}) oppure non ha compreso la richiesta (linguistiche: {fmt(groupB.linguistic)}). <strong style={{ color: "#f85149" }}>Questi sono i casi su cui intervenire.</strong>
-                    </div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "28px", fontWeight: 700, color: "#f85149" }}>{fmt(caso2)}</div>
-                    <div style={{ fontSize: "11px", color: "#484f58" }}>{((caso2 / groupB.total) * 100).toFixed(1)}% dei trasferimenti</div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-
-            {/* Proportional visual */}
             <Card style={{ marginBottom: "16px" }}>
-              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "14px" }}>Proporzione dei tre casi</div>
-              <ResponsiveContainer width="100%" height={80}>
-                <BarChart data={[{ c3: caso3, c1: caso1, c2: caso2 }]} layout="vertical" margin={{ left: 0, right: 0 }}>
-                  <XAxis type="number" hide />
-                  <YAxis type="category" hide />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="c3" name="Comportamento utente" stackId="s" fill="#484f58" barSize={32} />
-                  <Bar dataKey="c1" name="Scelta utente post-risposta" stackId="s" fill="#d29922" barSize={32} />
-                  <Bar dataKey="c2" name="Limite del sistema" stackId="s" fill="#f85149" barSize={32} />
+              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "14px" }}>Richieste operatore: perché lo chiedono ({fmt(operatorBreakdown.reduce((s, x) => s + x.v, 0))} totali)</div>
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={operatorBreakdown} layout="vertical" margin={{ left: 10, right: 16 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#21262d" horizontal={false} />
+                  <XAxis type="number" tick={{ fill: "#484f58", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="name" tick={{ fill: "#8b949e", fontSize: 11 }} width={120} axisLine={false} tickLine={false} />
+                  <Tooltip content={<CT />} />
+                  <Bar dataKey="v" name="Richieste" fill="#484f58" radius={[0, 4, 4, 0]} barSize={16} />
                 </BarChart>
               </ResponsiveContainer>
-              <div style={{ display: "flex", gap: "20px", marginTop: "10px", flexWrap: "wrap" }}>
-                {[
-                  { c: "#484f58", l: "Comportamento utente (93,5%)" },
-                  { c: "#d29922", l: "Scelta post-risposta (3,4%)" },
-                  { c: "#f85149", l: "Limite sistema (3,1%)" },
-                ].map((l, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: l.c }} />
-                    <span style={{ fontSize: "11px", color: "#8b949e" }}>{l.l}</span>
-                  </div>
-                ))}
-              </div>
             </Card>
 
-            {/* Products for KB miss */}
             <Card style={{ marginBottom: "16px" }}>
-              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "4px" }}>Prodotti più menzionati nei trasferimenti per KB miss</div>
-              <div style={{ fontSize: "11px", color: "#484f58", marginBottom: "16px" }}>Priorità di arricchimento per ridurre i {fmt(caso2)} errori reali</div>
-              <ResponsiveContainer width="100%" height={240}>
+              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "14px" }}>Prodotti più menzionati nei trasferimenti</div>
+              <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={products} layout="vertical" margin={{ left: 10, right: 16 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#21262d" horizontal={false} />
                   <XAxis type="number" tick={{ fill: "#484f58", fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: "#8b949e", fontSize: 11 }} width={100} axisLine={false} tickLine={false} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="v" name="Menzioni" fill="#f85149" radius={[0, 4, 4, 0]} barSize={16}>
-                    {products.map((_, i) => <Cell key={i} fill={i < 3 ? "#f85149" : "#484f58"} />)}
+                  <YAxis type="category" dataKey="name" tick={{ fill: "#8b949e", fontSize: 11 }} width={110} axisLine={false} tickLine={false} />
+                  <Tooltip content={<CT />} />
+                  <Bar dataKey="v" name="Menzioni" fill="#d29922" radius={[0, 4, 4, 0]} barSize={16}>
+                    {products.map((_, i) => <Cell key={i} fill={i < 3 ? "#d29922" : "#484f58"} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </Card>
 
             <Insight color="#f85149">
-              <strong style={{ color: "#f85149" }}>Solo il 3,1% dei trasferimenti è un limite reale del sistema.</strong> Il 96,9% è un comportamento dell'utente — richiesta diretta di operatore o scelta dopo aver ricevuto risposta. Il bot funziona: i margini di miglioramento tecnico esistono ma sono contenuti (328 KB miss + 40 linguistiche).
+              <strong style={{ color: "#f85149" }}>Solo il 14,6% dei trasferimenti è un limite reale del sistema</strong> ({fmt(systemLimit)} su {fmt(gB.total)}). L'85,4% è una scelta dell'utente. Il dato "70,9% trasferito" non significa "70,9% di errori" — la maggioranza degli utenti vuole parlare con un umano indipendentemente dalla qualità del bot.
             </Insight>
           </div>
         )}
 
-        {/* ═══ 4. RICLASSIFICAZIONE ═══ */}
-        {tab === "tag" && (
-          <div>
-            <SectionTitle sub="Alcuni tag nei dati creano un'impressione fuorviante. Ecco la lettura corretta.">Riclassificazione dei tag</SectionTitle>
-
-            {tagIssues.map((t, i) => (
-              <Card key={i} style={{ marginBottom: "12px" }}>
-                <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
-                  <div style={{ minWidth: "40px", textAlign: "center" }}>
-                    <div style={{ width: "36px", height: "36px", borderRadius: "8px", background: "#f8514915", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
-                      <span style={{ fontSize: "16px" }}>⚠️</span>
-                    </div>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px", flexWrap: "wrap" }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", color: "#f85149", textDecoration: "line-through" }}>{t.old}</span>
-                      <span style={{ color: "#484f58" }}>→</span>
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "13px", color: "#3fb950" }}>{t.new}</span>
-                    </div>
-                    <div style={{ fontSize: "13px", color: "#8b949e", lineHeight: 1.6, marginBottom: "8px" }}>{t.desc}</div>
-                    <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-                      {t.count && <span style={{ fontSize: "11px", fontFamily: "'JetBrains Mono', monospace", color: "#484f58" }}>{fmt(t.count)} conversazioni coinvolte</span>}
-                      <span style={{ fontSize: "11px", fontFamily: "'JetBrains Mono', monospace", color: "#3fb950" }}>{t.impact}</span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-
-            <Insight color="#d29922" style={{ marginTop: "16px" }}>
-              <strong style={{ color: "#d29922" }}>La classificazione dei tag influenza la percezione dei risultati.</strong> Rinominare "fallimento sistema" in "conversazione chiusa dall'utente" sposta 7.604 conversazioni da un'apparenza negativa a una lettura neutra/positiva. Non cambia i dati — cambia come vengono interpretati.
-            </Insight>
-          </div>
-        )}
-
-        {/* ═══ 5. DOMANDA ═══ */}
+        {/* ═══ 5. PROSSIMI PASSI ═══ */}
         {tab === "domanda" && (
           <div>
-            <SectionTitle sub="Il bot funziona. Il passo successivo è definire insieme come gestire i casi specifici.">La domanda per il cliente</SectionTitle>
+            <Stitle sub="Il bot funziona. Definiamo insieme come gestire i casi specifici.">Prossimi passi</Stitle>
 
             <Card style={{ marginBottom: "20px", borderTop: "3px solid #58a6ff" }}>
               <div style={{ fontSize: "13px", fontWeight: 600, color: "#58a6ff", marginBottom: "12px" }}>Sintesi dei risultati</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {[
-                  { icon: "✅", text: "Il bot gestisce correttamente il 46% delle conversazioni in completa autonomia." },
-                  { icon: "✅", text: "Le incomprensioni reali sono una percentuale minima: 368 su 21.987 (1,7%)." },
-                  { icon: "✅", text: "Molti trasferimenti avvengono anche quando il bot ha già risposto correttamente." },
-                  { icon: "✅", text: "La comprensione vocale è eccellente: solo 40 errori linguistici (0,18%)." },
-                  { icon: "📈", text: "Tutti i KPI migliorano nel tempo — il sistema si sta affinando." },
-                ].map((r, i) => (
-                  <div key={i} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                    <span style={{ fontSize: "16px", lineHeight: 1.3 }}>{r.icon}</span>
-                    <span style={{ fontSize: "13px", color: "#c9d1d9", lineHeight: 1.5 }}>{r.text}</span>
-                  </div>
-                ))}
-              </div>
+              {[
+                { icon: "✅", text: `Il bot gestisce ${fmt(gA.total)} conversazioni (${pct(gA.total, T)}%) senza operatore.` },
+                { icon: "✅", text: "Quando risponde, lo fa in modo pertinente nel 79,4% dei casi." },
+                { icon: "✅", text: "Eccelle su prezzo (83%), offerte (73%), disponibilità (72%), info prodotto (65%)." },
+                { icon: "✅", text: `Solo ${fmt(systemLimit)} trasferimenti (${pct(systemLimit, T)}%) sono dovuti a limiti reali del sistema.` },
+                { icon: "⚠️", text: `${fmt(totalKbMiss)} lacune KB e ${fmt(gB.linguistic)} incomprensioni: le aree di intervento tecnico.` },
+                { icon: "📊", text: `${fmt(recoverable)} conversazioni recuperabili con ottimizzazione mirata.` },
+              ].map((r, i) => (
+                <div key={i} style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginBottom: "8px" }}>
+                  <span style={{ fontSize: "16px", lineHeight: 1.3 }}>{r.icon}</span>
+                  <span style={{ fontSize: "13px", color: "#c9d1d9", lineHeight: 1.5 }}>{r.text}</span>
+                </div>
+              ))}
             </Card>
 
-            {/* The question */}
             <div style={{ background: "linear-gradient(135deg, #0d1117 0%, #161b22 100%)", border: "2px solid #58a6ff40", borderRadius: "16px", padding: "32px 28px", marginBottom: "20px", textAlign: "center" }}>
               <div style={{ fontSize: "13px", fontFamily: "'JetBrains Mono', monospace", color: "#58a6ff", letterSpacing: "2px", marginBottom: "16px" }}>LA DOMANDA</div>
               <div style={{ fontSize: "clamp(18px, 3vw, 24px)", fontWeight: 700, color: "#e6edf3", lineHeight: 1.4, maxWidth: "600px", margin: "0 auto" }}>
                 In queste situazioni, come volete che il bot si comporti?
               </div>
-              <div style={{ fontSize: "13px", color: "#484f58", marginTop: "16px", maxWidth: "500px", margin: "16px auto 0", lineHeight: 1.6 }}>
-                Il bot funziona e risponde alle richieste. Il punto ora è definire insieme come deve gestire alcuni casi specifici. È un lavoro di affinamento operativo — come si farebbe con un operatore umano.
+              <div style={{ fontSize: "13px", color: "#484f58", marginTop: "16px", maxWidth: "520px", margin: "16px auto 0", lineHeight: 1.6 }}>
+                Il bot funziona e risponde alle richieste. Ora definiamo insieme come gestire i casi limite. È un lavoro di affinamento operativo — come si farebbe con un operatore umano.
               </div>
             </div>
 
             <Card style={{ marginBottom: "16px" }}>
-              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "16px", color: "#e6edf3" }}>Scenari da discutere insieme</div>
+              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "16px", color: "#e6edf3" }}>Scenari da discutere</div>
               {[
-                { n: "A", q: "L'utente chiede subito l'operatore (49,5% delle chiamate)", options: "Trasferire immediatamente? Proporre prima cosa può fare il bot? Chiedere il motivo?", c: "#484f58" },
-                { n: "B", q: "Il bot ha risposto ma l'utente vuole comunque l'operatore", options: "Trasferire? Proporre prenotazione di richiamata? Chiedere se c'è altro che serve?", c: "#d29922" },
-                { n: "C", q: "Il bot non ha l'informazione nella KB", options: "Trasferire? Dire che l'info non è disponibile e suggerire il sito? Proporre email?", c: "#f85149" },
+                { n: "A", q: `L'utente chiede subito l'operatore (${fmt(gB.immediate)} casi, ${pct(gB.immediate, T)}%)`, options: "Trasferire immediatamente? Proporre prima cosa può fare il bot? Chiedere il motivo della chiamata?", c: "#484f58" },
+                { n: "B", q: `Il bot ha risposto ma l'utente vuole comunque l'operatore (${fmt(gB.postReply)} casi)`, options: "Trasferire? Proporre prenotazione di richiamata? Chiedere se c'è altro che serve?", c: "#d29922" },
+                { n: "C", q: `Il bot non ha l'informazione nella KB (${fmt(gB.kbMiss)} casi)`, options: "Trasferire? Dire che l'info non è disponibile e suggerire il sito? Proporre contatto email?", c: "#f85149" },
+                { n: "D", q: `Incomprensioni linguistiche (${fmt(gB.linguistic)} casi)`, options: "Quanti tentativi prima di trasferire? Proporre di riformulare? Offrire alternative (email, sito)?", c: "#f85149" },
               ].map((s, i) => (
-                <div key={i} style={{ display: "flex", gap: "16px", padding: "16px 0", borderBottom: i < 2 ? "1px solid #21262d" : "none", alignItems: "flex-start" }}>
+                <div key={i} style={{ display: "flex", gap: "16px", padding: "16px 0", borderBottom: i < 3 ? "1px solid #21262d" : "none", alignItems: "flex-start" }}>
                   <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "18px", fontWeight: 700, color: s.c, minWidth: "32px" }}>{s.n}</div>
                   <div>
-                    <div style={{ fontSize: "14px", fontWeight: 600, color: "#e6edf3", marginBottom: "4px" }}>{s.q}</div>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "#e6edf3", marginBottom: "4px" }}>{s.q}</div>
                     <div style={{ fontSize: "12px", color: "#8b949e", lineHeight: 1.6, fontStyle: "italic" }}>{s.options}</div>
                   </div>
                 </div>
               ))}
             </Card>
 
-            <Insight color="#58a6ff">
-              <strong style={{ color: "#58a6ff" }}>Il prossimo passo è decidere insieme.</strong> Ogni scelta che il cliente fa su questi scenari diventa una regola operativa nel prompt del voicebot. È esattamente come formare un nuovo operatore: il sistema è pronto, serve solo definire le procedure.
-            </Insight>
+            <Card>
+              <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "16px", color: "#e6edf3" }}>Piano di intervento tecnico</div>
+              {[
+                { n: "01", t: "Arricchire KB prodotti prioritari", d: `Lavatrice (330), telefono (138), televisore (107), computer (104): ${fmt(totalKbMiss)} lacune KB sono direttamente colmabili.`, tag: "ALTA", c: "#f85149" },
+                { n: "02", t: "Ridisegnare il welcome message", d: `Il 46,9% chiede operatore al primo turno. Comunicare subito le capacità del bot per trattenere più utenti.`, tag: "ALTA", c: "#f85149" },
+                { n: "03", t: "Migliorare risposte non pertinenti", d: `Il 21,2% delle risposte non è pertinente (${fmt(notPertinent)} casi). Affinare il prompt per migliorare la precisione.`, tag: "MEDIA", c: "#d29922" },
+                { n: "04", t: "Monitoraggio settimanale", d: "Tracciare pertinenza risposte, KB miss per prodotto, e containment rate per intent.", tag: "ONGOING", c: "#3fb950" },
+              ].map((item, i) => (
+                <div key={i} style={{ display: "flex", gap: "18px", padding: "16px 0", borderBottom: i < 3 ? "1px solid #21262d" : "none", alignItems: "flex-start" }}>
+                  <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "20px", fontWeight: 700, color: item.c, minWidth: "36px" }}>{item.n}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "4px" }}>
+                      <span style={{ fontSize: "13px", fontWeight: 600, color: "#e6edf3" }}>{item.t}</span>
+                      <span style={{ fontSize: "9px", fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, color: item.c, background: item.c + "15", padding: "3px 8px", borderRadius: "4px" }}>{item.tag}</span>
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#8b949e", lineHeight: 1.6 }}>{item.d}</div>
+                  </div>
+                </div>
+              ))}
+            </Card>
           </div>
         )}
       </div>

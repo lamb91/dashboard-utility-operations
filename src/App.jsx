@@ -130,6 +130,30 @@ function AiChat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [systemPrompt, setSystemPrompt] = useState(`Sei un analista esperto di voicebot per un progetto di customer care Euronics (catena di elettronica). Analizzi i dati delle conversazioni del voicebot per fornire insight utili al team.
+
+REGOLE DI RISPOSTA:
+- Rispondi SEMPRE in italiano naturale, con frasi complete e leggibili.
+- MAI mostrare dati grezzi, campi tecnici, pipe "|" o formati CSV. Rielabora tutto in linguaggio naturale.
+- Quando descrivi conversazioni specifiche, racconta cosa è successo come lo racconteresti a un collega: "L'utente ha chiesto X, il bot ha risposto Y, poi è successo Z."
+- Quando dai numeri aggregati, presentali in modo chiaro con una lista ordinata e leggibile.
+- Se la domanda chiede esempi specifici, descrivi 3-5 casi concreti in linguaggio naturale, spiegando cosa ha chiesto l'utente, come ha risposto il bot, e come si è conclusa la conversazione.
+- Se i dati non contengono l'informazione richiesta, dillo chiaramente.
+- Non inventare mai dati non presenti nel contesto.
+
+GLOSSARIO:
+- GESTITA_BOT_RISOLTA = conversazione gestita con successo dal bot, senza operatore
+- GESTITA_BOT_CHIUSA = il bot ha interagito, l'utente ha chiuso senza chiedere operatore
+- TRANSFER_IMMEDIATO = operatore chiesto al primo turno senza interazione col bot
+- TRANSFER_POST_RISPOSTA = il bot ha risposto, l'utente ha comunque chiesto l'operatore
+- TRANSFER_KB_MISS = il bot ha capito la domanda ma non aveva l'informazione
+- TRANSFER_INCOMPRENSIONI = il bot non ha capito cosa diceva l'utente
+- ABBANDONO = conversazione vuota o interrotta subito
+- bot_ha_risposto = il bot ha fornito almeno una risposta informativa
+- risposta_pertinente = la risposta del bot era attinente alla domanda
+- num_incomprensioni = quante volte il bot non ha capito l'utente
+- num_kb_miss = quante volte il bot non ha trovato l'informazione`);
   const chatEnd = useRef(null);
   const fileRef = useRef(null);
 
@@ -274,7 +298,7 @@ ${perEsito.join("\n")}`;
         body: JSON.stringify({
           model: "google/gemini-2.5-flash-lite",
           messages: [
-            { role: "system", content: `Sei un analista esperto di voicebot. Rispondi in italiano in modo chiaro e conciso basandoti SOLO sui dati forniti. Se fai calcoli, mostra i numeri. Se i dati non contengono l'informazione richiesta, dillo chiaramente. Non inventare dati.\n\nContesto dati:\n${context}` },
+            { role: "system", content: `${systemPrompt}\n\nContesto dati:\n${context}` },
             ...messages.filter(m => m.role !== "system").slice(-6).map(m => ({ role: m.role, content: m.text })),
             { role: "user", content: q },
           ],
@@ -343,6 +367,32 @@ ${perEsito.join("\n")}`;
                   }}>
                     📎 Clicca per caricare il file Excel delle conversazioni
                   </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* System prompt editor */}
+          {keySet && xlsData && (
+            <div style={{ marginBottom: "12px" }}>
+              <button onClick={() => setShowPrompt(!showPrompt)} style={{
+                background: "transparent", border: "none", cursor: "pointer", fontSize: "12px",
+                color: textLight, display: "flex", alignItems: "center", gap: "6px", padding: "4px 0", marginBottom: showPrompt ? "8px" : "0",
+              }}>
+                <span style={{ transform: showPrompt ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }}>▾</span>
+                {showPrompt ? "Nascondi prompt di sistema" : "Personalizza prompt di sistema"}
+              </button>
+              {showPrompt && (
+                <div>
+                  <textarea value={systemPrompt} onChange={e => setSystemPrompt(e.target.value)}
+                    style={{
+                      width: "100%", minHeight: "200px", padding: "12px", border: `1px solid ${paleNavy}`,
+                      borderRadius: "8px", fontSize: "12px", fontFamily: "'JetBrains Mono', monospace",
+                      color: textDark, lineHeight: 1.5, resize: "vertical",
+                    }} />
+                  <div style={{ fontSize: "11px", color: textLight, marginTop: "4px" }}>
+                    Questo prompt viene inviato al modello AI prima di ogni domanda. Modificalo per personalizzare il comportamento delle risposte.
+                  </div>
                 </div>
               )}
             </div>

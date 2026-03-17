@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, PieChart, Pie } from "recharts";
+import * as XLSX from "xlsx";
 
 const T = 21599;
 const fmt = (n) => typeof n === "number" ? n.toLocaleString("it-IT") : n;
@@ -119,8 +120,6 @@ const catKBproducts = [
   { name: "Frigo", v: 13 }, { name: "Computer", v: 11 }, { name: "Frigorifero", v: 10 },
 ];
 
-];
-
 // ═══ AI CHAT COMPONENT ═══
 function AiChat() {
   const [isOpen, setIsOpen] = useState(false);
@@ -139,25 +138,12 @@ function AiChat() {
   const parseExcel = (file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
-      script.onload = () => {
-        const wb = window.XLSX.read(new Uint8Array(e.target.result), { type: "array" });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows = window.XLSX.utils.sheet_to_json(ws);
-        setXlsData(rows);
-        setXlsName(file.name);
-        setMessages(prev => [...prev, { role: "system", text: `File caricato: ${file.name} — ${rows.length} righe. Puoi fare domande sui dati.` }]);
-      };
-      if (!window.XLSX) document.head.appendChild(script);
-      else {
-        const wb = window.XLSX.read(new Uint8Array(e.target.result), { type: "array" });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows = window.XLSX.utils.sheet_to_json(ws);
-        setXlsData(rows);
-        setXlsName(file.name);
-        setMessages(prev => [...prev, { role: "system", text: `File caricato: ${file.name} — ${rows.length} righe. Puoi fare domande sui dati.` }]);
-      }
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws);
+      setXlsData(rows);
+      setXlsName(file.name);
+      setMessages(prev => [...prev, { role: "system", text: `File caricato: ${file.name} — ${rows.length} righe. Puoi fare domande sui dati.` }]);
     };
     reader.readAsArrayBuffer(file);
   };
@@ -1110,4 +1096,3 @@ export default function App() {
     </div>
   );
 }
-// update

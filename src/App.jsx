@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, PieChart, Pie } from "recharts";
 
 const T = 21599;
@@ -118,6 +118,260 @@ const catKBproducts = [
   { name: "Lavatrice", v: 46 }, { name: "Televisore", v: 19 }, { name: "Lavastoviglie", v: 15 },
   { name: "Frigo", v: 13 }, { name: "Computer", v: 11 }, { name: "Frigorifero", v: 10 },
 ];
+
+];
+
+// ═══ AI CHAT COMPONENT ═══
+function AiChat() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [keySet, setKeySet] = useState(false);
+  const [xlsData, setXlsData] = useState(null);
+  const [xlsName, setXlsName] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const chatEnd = useRef(null);
+  const fileRef = useRef(null);
+
+  useEffect(() => { chatEnd.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  const parseExcel = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+      script.onload = () => {
+        const wb = window.XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = window.XLSX.utils.sheet_to_json(ws);
+        setXlsData(rows);
+        setXlsName(file.name);
+        setMessages(prev => [...prev, { role: "system", text: `File caricato: ${file.name} — ${rows.length} righe. Puoi fare domande sui dati.` }]);
+      };
+      if (!window.XLSX) document.head.appendChild(script);
+      else {
+        const wb = window.XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = window.XLSX.utils.sheet_to_json(ws);
+        setXlsData(rows);
+        setXlsName(file.name);
+        setMessages(prev => [...prev, { role: "system", text: `File caricato: ${file.name} — ${rows.length} righe. Puoi fare domande sui dati.` }]);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const buildContext = (question) => {
+    if (!xlsData) return "";
+    const q = question.toLowerCase();
+    let filtered = xlsData;
+    const keywords = {
+      "kb_miss": r => r.esito === "TRANSFER_KB_MISS" || r.num_kb_miss > 0,
+      "kb miss": r => r.esito === "TRANSFER_KB_MISS" || r.num_kb_miss > 0,
+      "knowledge base": r => r.esito === "TRANSFER_KB_MISS" || r.num_kb_miss > 0,
+      "mancant": r => r.esito === "TRANSFER_KB_MISS" || r.num_kb_miss > 0,
+      "incomprension": r => r.num_incomprensioni > 0 || r.esito === "TRANSFER_INCOMPRENSIONI",
+      "non capito": r => r.num_incomprensioni > 0,
+      "risolt": r => r.esito === "GESTITA_BOT_RISOLTA",
+      "chiuse": r => r.esito === "GESTITA_BOT_CHIUSA",
+      "gestite": r => r.esito === "GESTITA_BOT_RISOLTA" || r.esito === "GESTITA_BOT_CHIUSA",
+      "trasferit": r => r.esito?.startsWith("TRANSFER"),
+      "immediat": r => r.esito === "TRANSFER_IMMEDIATO",
+      "post risposta": r => r.esito === "TRANSFER_POST_RISPOSTA",
+      "operatore": r => r.intent_principale?.includes("operatore"),
+      "abbandono": r => r.esito === "ABBANDONO",
+      "lavatrice": r => String(r.prodotto_menzionato || "").toLowerCase().includes("lavatrice"),
+      "telefon": r => String(r.prodotto_menzionato || "").toLowerCase().includes("telefon"),
+      "tv": r => String(r.prodotto_menzionato || "").toLowerCase().match(/\b(tv|televisor|television)\b/i),
+      "frigorifero": r => String(r.prodotto_menzionato || "").toLowerCase().includes("frigo"),
+      "computer": r => String(r.prodotto_menzionato || "").toLowerCase().includes("computer"),
+      "disponibilit": r => r.intent_principale === "disponibilita_prodotto",
+      "prezzo": r => r.intent_principale === "prezzo_prodotto",
+      "ordine": r => r.intent_principale === "stato_ordine",
+      "assistenza": r => r.intent_principale === "assistenza_tecnica",
+      "reso": r => r.intent_principale === "reso_rimborso",
+      "offert": r => r.intent_principale === "offerte_promozioni",
+      "garanzia": r => r.intent_principale === "garanzia",
+      "negozio": r => r.intent_principale === "info_negozio" || r.intent_principale === "operatore_punto_vendita",
+      "pertinent": r => r.risposta_pertinente === 1 || r.risposta_pertinente === 0,
+    };
+
+    for (const [kw, filterFn] of Object.entries(keywords)) {
+      if (q.includes(kw)) {
+        filtered = xlsData.filter(filterFn);
+        break;
+      }
+    }
+
+    if (filtered.length === xlsData.length && filtered.length > 500) {
+      filtered = xlsData.slice(0, 200);
+    }
+
+    const maxRows = 150;
+    const sample = filtered.length > maxRows ? filtered.slice(0, maxRows) : filtered;
+    const cols = ["esito","bot_ha_risposto","risposta_pertinente","num_turni_utili","num_incomprensioni","num_kb_miss","intent_principale","intent_dettaglio","motivo_trasferimento","prodotto_menzionato","note"];
+    const compact = sample.map(r => {
+      const parts = cols.map(c => {
+        const v = r[c];
+        if (v === undefined || v === null || v === "" || v === "NaN" || (typeof v === "number" && isNaN(v))) return null;
+        return `${c}=${v}`;
+      }).filter(Boolean);
+      return parts.join("|");
+    });
+
+    return `Dataset: ${xlsData.length} conversazioni totali.\nFiltro applicato: ${filtered.length} righe trovate (mostrate ${sample.length}).\nColonne: ${cols.join(", ")}\n\nDati:\n${compact.join("\n")}`;
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim() || !apiKey || !xlsData) return;
+    const q = input.trim();
+    setInput("");
+    setMessages(prev => [...prev, { role: "user", text: q }]);
+    setLoading(true);
+
+    try {
+      const context = buildContext(q);
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite-preview",
+          messages: [
+            { role: "system", content: `Sei un analista esperto di voicebot. Rispondi in italiano in modo chiaro e conciso basandoti SOLO sui dati forniti. Se fai calcoli, mostra i numeri. Se i dati non contengono l'informazione richiesta, dillo chiaramente. Non inventare dati.\n\nContesto dati:\n${context}` },
+            ...messages.filter(m => m.role !== "system").slice(-6).map(m => ({ role: m.role, content: m.text })),
+            { role: "user", content: q },
+          ],
+          max_tokens: 1500,
+        }),
+      });
+      const data = await res.json();
+      const reply = data.choices?.[0]?.message?.content || data.error?.message || "Errore nella risposta.";
+      setMessages(prev => [...prev, { role: "assistant", text: reply }]);
+    } catch (err) {
+      setMessages(prev => [...prev, { role: "assistant", text: `Errore: ${err.message}` }]);
+    }
+    setLoading(false);
+  };
+
+  if (!isOpen) {
+    return (
+      <div style={{ maxWidth: "880px", margin: "0 auto", padding: "0 1.5rem 2rem" }}>
+        <button onClick={() => setIsOpen(true)} style={{
+          width: "100%", padding: "16px", border: `2px solid ${navy}`, borderRadius: "12px",
+          background: paleNavy, cursor: "pointer", fontSize: "14px", fontWeight: 600, color: navy,
+          display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+        }}>
+          <span style={{ fontSize: "20px" }}>💬</span>
+          Chiedi ai dati — interroga il dettaglio delle conversazioni con l'AI
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ maxWidth: "880px", margin: "0 auto", padding: "0 1.5rem 2rem" }}>
+      <div style={{ border: `2px solid ${navy}`, borderRadius: "12px", overflow: "hidden" }}>
+        {/* Header */}
+        <div style={{ background: navy, color: white, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "18px" }}>💬</span>
+            <span style={{ fontSize: "14px", fontWeight: 600 }}>Chiedi ai dati</span>
+            {xlsName && <span style={{ fontSize: "11px", opacity: 0.6, fontFamily: "'JetBrains Mono', monospace" }}>{xlsName} · {xlsData?.length} righe</span>}
+          </div>
+          <button onClick={() => setIsOpen(false)} style={{ background: "transparent", border: "none", color: white, fontSize: "18px", cursor: "pointer", opacity: 0.6 }}>✕</button>
+        </div>
+
+        <div style={{ padding: "1.25rem", background: white }}>
+          {/* Setup: API key + file */}
+          {(!keySet || !xlsData) && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px" }}>
+              {!keySet && (
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input type="password" placeholder="API key OpenRouter" value={apiKey}
+                    onChange={e => setApiKey(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter" && apiKey.trim()) setKeySet(true); }}
+                    style={{ flex: 1, padding: "10px 14px", border: `1px solid ${paleNavy}`, borderRadius: "8px", fontSize: "13px", fontFamily: "'JetBrains Mono', monospace" }} />
+                  <button onClick={() => { if (apiKey.trim()) setKeySet(true); }} style={{
+                    padding: "10px 20px", border: "none", borderRadius: "8px", background: navy, color: white, fontSize: "13px", fontWeight: 600, cursor: "pointer",
+                  }}>Salva</button>
+                </div>
+              )}
+              {keySet && !xlsData && (
+                <div>
+                  <input type="file" ref={fileRef} accept=".xlsx,.xls,.csv" style={{ display: "none" }}
+                    onChange={e => { if (e.target.files[0]) parseExcel(e.target.files[0]); }} />
+                  <button onClick={() => fileRef.current?.click()} style={{
+                    width: "100%", padding: "20px", border: `2px dashed ${paleNavy}`, borderRadius: "8px",
+                    background: `${paleNavy}60`, cursor: "pointer", fontSize: "13px", color: textMid, fontWeight: 500,
+                  }}>
+                    📎 Clicca per caricare il file Excel delle conversazioni
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Chat messages */}
+          {messages.length > 0 && (
+            <div style={{ maxHeight: "400px", overflowY: "auto", marginBottom: "12px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              {messages.map((m, i) => (
+                <div key={i} style={{
+                  padding: "10px 14px", borderRadius: "10px", fontSize: "13px", lineHeight: 1.6, whiteSpace: "pre-wrap",
+                  ...(m.role === "user" ? { background: navy, color: white, marginLeft: "20%", borderBottomRightRadius: "4px" } :
+                     m.role === "system" ? { background: paleNavy, color: textMid, fontStyle: "italic", textAlign: "center", fontSize: "12px" } :
+                     { background: paleNavy, color: textDark, marginRight: "10%", borderBottomLeftRadius: "4px" }),
+                }}>
+                  {m.text}
+                </div>
+              ))}
+              {loading && (
+                <div style={{ background: paleNavy, color: textLight, padding: "10px 14px", borderRadius: "10px", fontSize: "12px", fontStyle: "italic" }}>
+                  Analizzo i dati...
+                </div>
+              )}
+              <div ref={chatEnd} />
+            </div>
+          )}
+
+          {/* Input */}
+          {keySet && xlsData && (
+            <div style={{ display: "flex", gap: "8px" }}>
+              <input type="text" placeholder="Es: Quali prodotti causano più KB miss?" value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && !loading) sendMessage(); }}
+                style={{ flex: 1, padding: "10px 14px", border: `1px solid ${paleNavy}`, borderRadius: "8px", fontSize: "13px" }} />
+              <button onClick={sendMessage} disabled={loading || !input.trim()} style={{
+                padding: "10px 20px", border: "none", borderRadius: "8px",
+                background: loading ? textLight : navy, color: white, fontSize: "13px", fontWeight: 600,
+                cursor: loading ? "wait" : "pointer", opacity: !input.trim() ? 0.5 : 1,
+              }}>Chiedi</button>
+            </div>
+          )}
+
+          {/* Suggested questions */}
+          {keySet && xlsData && messages.length < 3 && (
+            <div style={{ marginTop: "12px", display: "flex", flexWrap: "wrap", gap: "6px" }}>
+              {[
+                "Quali prodotti causano più KB miss?",
+                "Quante conversazioni sulla lavatrice sono state risolte?",
+                "Mostrami i casi di incomprensione sullo stato ordine",
+                "Qual è il tasso di successo per le richieste di prezzo?",
+                "Quante conversazioni hanno 3+ incomprensioni?",
+              ].map((q, i) => (
+                <button key={i} onClick={() => { setInput(q); }} style={{
+                  padding: "6px 12px", border: `1px solid ${paleNavy}`, borderRadius: "20px",
+                  background: white, fontSize: "11px", color: textMid, cursor: "pointer",
+                  transition: "all 0.15s",
+                }}>{q}</button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [deepDive, setDeepDive] = useState(null);
@@ -846,6 +1100,9 @@ export default function App() {
         </div>
 
       </div>
+
+      {/* ═══ AI CHAT PANEL ═══ */}
+      <AiChat />
 
       <div style={{ background: navy, color: white, padding: "1.5rem", textAlign: "center" }}>
         <div style={{ fontSize: "13px", opacity: 0.7 }}>Report realizzato da <strong style={{ color: orange }}>Ellysse</strong> · Divisione AI conversazionale di Maps Group</div>

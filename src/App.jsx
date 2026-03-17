@@ -63,17 +63,17 @@ function TabButton({ active, color, children, onClick }) {
 }
 
 const intents = [
-  { name: "Prezzo prodotto", bot: 322, op: 66, tot: 388 },
-  { name: "Offerte e promozioni", bot: 146, op: 55, tot: 201 },
-  { name: "Disponibilità prodotto", bot: 1912, op: 729, tot: 2641 },
-  { name: "Info prodotto", bot: 685, op: 361, tot: 1046 },
-  { name: "Stato ordine", bot: 929, op: 530, tot: 1459 },
-  { name: "Info pagamento", bot: 134, op: 101, tot: 235 },
-  { name: "Info negozio", bot: 313, op: 306, tot: 619 },
-  { name: "Consegna e modifiche", bot: 104, op: 134, tot: 238 },
-  { name: "Assistenza tecnica", bot: 337, op: 1233, tot: 1570 },
-  { name: "Reso e rimborso", bot: 56, op: 223, tot: 279 },
-].map(i => ({ ...i, pctBot: Math.round((i.bot / i.tot) * 100) })).sort((a, b) => b.pctBot - a.pctBot);
+  { name: "Prezzo prodotto", full: 322, partial: 16, none: 50, tot: 388 },
+  { name: "Offerte e promozioni", full: 146, partial: 20, none: 35, tot: 201 },
+  { name: "Disponibilità prodotto", full: 1911, partial: 307, none: 422, tot: 2641 },
+  { name: "Info prodotto", full: 678, partial: 206, none: 155, tot: 1046 },
+  { name: "Stato ordine", full: 929, partial: 189, none: 341, tot: 1459 },
+  { name: "Info pagamento", full: 134, partial: 76, none: 25, tot: 235 },
+  { name: "Info negozio", full: 312, partial: 124, none: 182, tot: 619 },
+  { name: "Consegna e modifiche", full: 104, partial: 96, none: 38, tot: 238 },
+  { name: "Assistenza tecnica", full: 333, partial: 728, none: 505, tot: 1570 },
+  { name: "Reso e rimborso", full: 56, partial: 179, none: 44, tot: 279 },
+].map(i => ({ ...i, pctFull: Math.round((i.full / i.tot) * 100), pctPartial: Math.round((i.partial / i.tot) * 100), pctNone: Math.round((i.none / i.tot) * 100) })).sort((a, b) => b.pctFull - a.pctFull);
 
 const products = [
   { name: "Lavatrice", v: 330 }, { name: "Telefono", v: 138 }, { name: "TV/Televisore", v: 197 },
@@ -507,7 +507,7 @@ export default function App() {
             <div style={{ width: "46.9%", background: paleNavy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: "12px", fontWeight: 600, color: textMid }}>46,9%</span></div>
           </div>
           <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "1.25rem" }}>
-            {[{ c: navy, l: "Gestite interamente dal bot" }, { c: orange, l: "Bot ha risposto, utente sceglie operatore" }, { c: paleNavy, l: "Il bot non ha potuto intervenire", border: true }].map((lg, i) => (
+            {[{ c: navy, l: "Gestite interamente dal bot" }, { c: orange, l: "Bot ha risposto, utente sceglie operatore" }, { c: paleNavy, l: "Il bot non è stato interpellato", border: true }].map((lg, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <div style={{ width: 12, height: 12, borderRadius: "3px", background: lg.c, border: lg.border ? `1px solid ${textLight}` : "none" }} />
                 <span style={{ fontSize: "12px", color: textMid }}>{lg.l}</span>
@@ -518,9 +518,9 @@ export default function App() {
           {/* 3 summary cards */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "12px", marginBottom: "1.25rem" }}>
             {[
-              { val: 6019, title: "Gestite interamente dal bot", desc: "Il bot ha risposto dall'inizio alla fine. Nessun operatore necessario.", sub: `${fmt(1898)} risolte · ${fmt(4121)} chiuse dall'utente`, c: navy, dd: "100" },
-              { val: 5170, title: "Bot ha risposto, utente ha scelto operatore", desc: "Il bot ha interagito con l'utente — fornendo informazioni o tentando di rispondere — ma l'utente è stato trasferito a un operatore.", sub: `${fmt(2938)} scelta utente · ${fmt(1333)} info mancanti · ${fmt(899)} incomprensioni`, c: orange, dd: "50" },
-              { val: 10136, title: "Il bot non ha potuto intervenire", desc: "L'utente ha chiesto l'operatore al primo turno, senza dare al bot la possibilità di rispondere.", sub: `${fmt(10136)} richieste operatore al 1° turno`, c: textLight, dd: "0" },
+              { val: 6019, title: "Gestite interamente dal bot", desc: "Il bot ha risposto dall'inizio alla fine. Nessun operatore necessario.", sub: `${fmt(1898)} chiuse dal bot · ${fmt(4121)} chiuse dall'utente`, c: navy, dd: "100" },
+              { val: 5170, title: "Bot ha risposto, utente ha chiesto l'operatore", desc: "Il bot ha interagito con l'utente — fornendo informazioni o tentando di rispondere — ma l'utente ha chiesto comunque di parlare con un operatore.", sub: `${fmt(2938)} scelta utente · ${fmt(1333)} info mancanti · ${fmt(899)} incomprensioni`, c: orange, dd: "50" },
+              { val: 10136, title: "Il bot non è stato interpellato", desc: "L'utente ha chiesto l'operatore al primo turno, senza dare al bot la possibilità di rispondere.", sub: `${fmt(10136)} richieste operatore al 1° turno`, c: textLight, dd: "0" },
             ].map((card, i) => (
               <div key={i} style={{ background: white, border: `1px solid ${paleNavy}`, borderRadius: "12px", padding: "1.25rem", borderLeft: `5px solid ${card.c}` }}>
                 <div style={{ fontSize: "26px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: card.c }}>{fmt(card.val)}</div>
@@ -544,13 +544,13 @@ export default function App() {
             <div style={{ border: `2px solid ${navy}`, borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem", background: `${paleNavy}40` }}>
               <h3 style={{ fontSize: "16px", fontWeight: 600, color: navy, margin: "0 0 6px" }}>Approfondimento: {fmt(6019)} conversazioni gestite interamente</h3>
               <p style={{ fontSize: "13px", color: textMid, margin: "0 0 1.25rem", lineHeight: 1.6 }}>
-                Il bot ha ricevuto la richiesta, ha risposto e ha concluso la conversazione. L'utente non ha avuto bisogno di un operatore. In media le conversazioni risolte durano 1,6 turni — il bot è rapido ed efficiente.
+                Il bot ha ricevuto la richiesta, ha risposto e ha concluso la conversazione. L'utente non ha avuto bisogno di un operatore. In media le conversazioni chiuse dal bot durano 1,6 turni — il bot è rapido ed efficiente.
               </p>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "10px", marginBottom: "1.25rem" }}>
-                <Metric value={fmt(1898)} label="Risolte completamente" sub="Risposta data, utente soddisfatto" />
+                <Metric value={fmt(1898)} label="Chiuse dal bot" sub="Il bot ha fornito le informazioni" />
                 <Metric value={fmt(4121)} label="Chiuse dall'utente" sub="Info ricevute, utente chiude" />
-                <Metric value="1,6" label="Turni medi (risolte)" sub="Conversazioni rapide" />
+                <Metric value="1,6" label="Turni medi (chiuse dal bot)" sub="Conversazioni rapide" />
                 <Metric value={fmt(Math.round(6019/25))} label="Al giorno" sub="Media su 25 giorni" />
               </div>
 
@@ -568,7 +568,7 @@ export default function App() {
                   </ResponsiveContainer>
                 </div>
                 <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "10px", padding: "1.25rem", background: white }}>
-                  <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "12px" }}>Prodotti più richiesti (risolte)</div>
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "12px" }}>Prodotti più richiesti (chiuse dal bot)</div>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={cat100products} layout="vertical" margin={{ left: 10, right: 16 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke={paleNavy} horizontal={false} />
@@ -581,7 +581,7 @@ export default function App() {
                 </div>
               </div>
 
-              <ExBlock title="Esempi reali di conversazioni risolte dal bot" items={[
+              <ExBlock title="Esempi reali di conversazioni gestite dal bot" items={[
                 { tag: "Prezzo", text: "\"Quanto costa l'iPhone 16 Pro da 256 giga?\" — il bot propone i modelli disponibili, l'utente sceglie, il bot fornisce il prezzo. 3 turni, risolta." },
                 { tag: "Stato ordine", text: "\"Vorrei sapere lo stato della mia riparazione\" — il bot chiede numero documento e data, recupera le informazioni, conferma la data di ritiro. 4 turni." },
                 { tag: "Disponibilità", text: "\"Avete il frigorifero Hisense del volantino?\" — il bot conferma la disponibilità in negozio e fornisce i dettagli del prodotto. 2 turni." },
@@ -590,7 +590,7 @@ export default function App() {
               ]} />
 
               <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: navy, lineHeight: 1.6, borderLeft: `4px solid ${navy}` }}>
-                <strong>Il bot eccelle su disponibilità (1.911 gestite), stato ordine (929) e info prodotto (678).</strong> Il prodotto più richiesto nelle conversazioni risolte è la lavatrice (72), seguita da frigorifero (23) e lavastoviglie (22).
+                <strong>Il bot eccelle su disponibilità (1.911 gestite), stato ordine (929) e info prodotto (678).</strong> Il prodotto più richiesto nelle conversazioni chiuse dal bot è la lavatrice (72), seguita da frigorifero (23) e lavastoviglie (22).
               </div>
             </div>
           )}
@@ -600,7 +600,7 @@ export default function App() {
             <div style={{ border: `2px solid ${orange}`, borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem", background: `${paleOrange}40` }}>
               <h3 style={{ fontSize: "16px", fontWeight: 600, color: orange, margin: "0 0 6px" }}>Approfondimento: {fmt(5170)} conversazioni dove il bot ha interagito</h3>
               <p style={{ fontSize: "13px", color: textMid, margin: "0 0 1.25rem", lineHeight: 1.6 }}>
-                In queste conversazioni il bot ha risposto alle richieste dell'utente o ha tentato di farlo, ma l'utente è stato comunque trasferito a un operatore. I motivi sono diversi: in {fmt(2938)} casi l'utente ha scelto volontariamente l'operatore dopo aver ricevuto risposta, in {fmt(1333)} il bot non aveva l'informazione nella knowledge base, e in {fmt(899)} il bot non ha capito la richiesta.
+                In queste conversazioni il bot ha risposto alle richieste dell'utente o ha tentato di farlo, ma l'utente ha chiesto comunque di parlare con un operatore. I motivi sono diversi: in {fmt(2938)} casi l'utente ha scelto volontariamente l'operatore dopo aver ricevuto risposta, in {fmt(1333)} il bot non aveva l'informazione nella knowledge base, e in {fmt(899)} il bot non ha capito la richiesta.
               </p>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "10px", marginBottom: "1.25rem" }}>
@@ -729,32 +729,35 @@ export default function App() {
         {/* ═══ 2. ARGOMENTI ═══ */}
         <div style={{ marginBottom: "3rem" }}>
           <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>2. Su quali argomenti il bot è più efficace</h2>
-          <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>Per ogni tipo di richiesta, quante vengono gestite dal bot e quante passano a un operatore.</p>
+          <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>Per ogni tipo di richiesta, quante vengono gestite interamente dal bot, quante parzialmente (il bot risponde ma l'utente chiede l'operatore) e quante non vengono gestite.</p>
 
           <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "12px", overflow: "hidden", marginBottom: "1.5rem" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
               <thead>
                 <tr style={{ background: navy, color: white }}>
                   <th style={{ textAlign: "left", padding: "12px 16px", fontWeight: 600, fontSize: "12px" }}>Argomento</th>
-                  <th style={{ textAlign: "right", padding: "12px 16px", fontWeight: 600, fontSize: "12px" }}>Bot</th>
-                  <th style={{ textAlign: "right", padding: "12px 16px", fontWeight: 600, fontSize: "12px" }}>Operatore</th>
-                  <th style={{ textAlign: "right", padding: "12px 16px", fontWeight: 600, fontSize: "12px" }}>Totale</th>
-                  <th style={{ textAlign: "left", padding: "12px 16px", fontWeight: 600, fontSize: "12px", width: "28%" }}>Efficacia</th>
+                  <th style={{ textAlign: "right", padding: "12px 10px", fontWeight: 600, fontSize: "11px" }}>Gestite bot</th>
+                  <th style={{ textAlign: "right", padding: "12px 10px", fontWeight: 600, fontSize: "11px" }}>Parziali</th>
+                  <th style={{ textAlign: "right", padding: "12px 10px", fontWeight: 600, fontSize: "11px" }}>Non gestite</th>
+                  <th style={{ textAlign: "right", padding: "12px 10px", fontWeight: 600, fontSize: "11px" }}>Totale</th>
+                  <th style={{ textAlign: "left", padding: "12px 16px", fontWeight: 600, fontSize: "11px", width: "22%" }}>Gestione bot</th>
                 </tr>
               </thead>
               <tbody>
                 {intents.map((it, i) => (
                   <tr key={i} style={{ background: i % 2 === 0 ? white : paleNavy }}>
-                    <td style={{ padding: "10px 16px", fontWeight: 600, color: navy }}>{it.name}</td>
-                    <td style={{ padding: "10px 16px", textAlign: "right", fontFamily: "'JetBrains Mono', monospace", color: navy }}>{fmt(it.bot)}</td>
-                    <td style={{ padding: "10px 16px", textAlign: "right", fontFamily: "'JetBrains Mono', monospace", color: textLight }}>{fmt(it.op)}</td>
-                    <td style={{ padding: "10px 16px", textAlign: "right", fontFamily: "'JetBrains Mono', monospace" }}>{fmt(it.tot)}</td>
+                    <td style={{ padding: "10px 16px", fontWeight: 600, color: navy, fontSize: "12px" }}>{it.name}</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: "'JetBrains Mono', monospace", color: navy, fontSize: "12px" }}>{fmt(it.full)}</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: "'JetBrains Mono', monospace", color: orange, fontSize: "12px" }}>{fmt(it.partial)}</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: "'JetBrains Mono', monospace", color: textLight, fontSize: "12px" }}>{fmt(it.none)}</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>{fmt(it.tot)}</td>
                     <td style={{ padding: "10px 16px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div style={{ flex: 1, height: "10px", background: "#e0e8f0", borderRadius: "5px", overflow: "hidden" }}>
-                          <div style={{ height: "100%", width: it.pctBot + "%", background: it.pctBot >= 50 ? navy : it.pctBot >= 30 ? orange : red, borderRadius: "5px" }} />
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <div style={{ flex: 1, height: "10px", background: "#e0e8f0", borderRadius: "5px", overflow: "hidden", display: "flex" }}>
+                          <div style={{ height: "100%", width: it.pctFull + "%", background: navy, borderRadius: "5px 0 0 5px" }} />
+                          <div style={{ height: "100%", width: it.pctPartial + "%", background: orange }} />
                         </div>
-                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", minWidth: "32px", textAlign: "right", fontWeight: 600, color: it.pctBot >= 50 ? navy : it.pctBot >= 30 ? orange : red }}>{it.pctBot}%</span>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", minWidth: "28px", textAlign: "right", fontWeight: 600, color: navy }}>{it.pctFull}%</span>
                       </div>
                     </td>
                   </tr>
@@ -766,7 +769,7 @@ export default function App() {
           <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "12px", padding: "1.25rem", marginBottom: "1.5rem" }}>
             <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "4px" }}>Confronto visivo</div>
             <div style={{ display: "flex", gap: "16px", marginBottom: "14px" }}>
-              {[{ c: navy, l: "Gestite dal bot" }, { c: "#c8d8e8", l: "Passate a operatore" }].map((lg, i) => (
+              {[{ c: navy, l: "Gestite interamente" }, { c: orange, l: "Parziali (bot ha risposto)" }, { c: "#c8d8e8", l: "Non gestite" }].map((lg, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                   <div style={{ width: 10, height: 10, borderRadius: "2px", background: lg.c }} />
                   <span style={{ fontSize: "12px", color: textMid }}>{lg.l}</span>
@@ -779,14 +782,15 @@ export default function App() {
                 <XAxis type="number" tick={{ fill: textLight, fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis type="category" dataKey="name" tick={{ fill: textDark, fontSize: 12 }} width={140} axisLine={false} tickLine={false} />
                 <Tooltip content={<CT />} />
-                <Bar dataKey="bot" name="Gestite dal bot" stackId="a" fill={navy} barSize={16} />
-                <Bar dataKey="op" name="Passate a operatore" stackId="a" fill="#c8d8e8" barSize={16} />
+                <Bar dataKey="full" name="Gestite interamente" stackId="a" fill={navy} barSize={16} />
+                <Bar dataKey="partial" name="Parziali" stackId="a" fill={orange} barSize={16} />
+                <Bar dataKey="none" name="Non gestite" stackId="a" fill="#c8d8e8" barSize={16} />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: navy, lineHeight: 1.6, borderLeft: `4px solid ${orange}` }}>
-            <strong>Il bot gestisce l'83% delle richieste su prezzi, il 73% sulle offerte e il 72% sulla disponibilità.</strong> Assistenza tecnica e resi sono argomenti dove il cliente preferisce naturalmente la conferma di una persona.
+            <strong>Il bot gestisce interamente l'83% delle richieste su prezzi, il 73% sulle offerte e il 72% sulla disponibilità.</strong> Per l'assistenza tecnica il bot risponde nel 68% dei casi (21% interamente + 46% parzialmente), ma il cliente preferisce spesso la conferma di una persona.
           </div>
         </div>
 

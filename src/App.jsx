@@ -222,7 +222,7 @@ function AiChat() {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash-lite-preview",
+          model: "google/gemini-2.5-flash-lite",
           messages: [
             { role: "system", content: `Sei un analista esperto di voicebot. Rispondi in italiano in modo chiaro e conciso basandoti SOLO sui dati forniti. Se fai calcoli, mostra i numeri. Se i dati non contengono l'informazione richiesta, dillo chiaramente. Non inventare dati.\n\nContesto dati:\n${context}` },
             ...messages.filter(m => m.role !== "system").slice(-6).map(m => ({ role: m.role, content: m.text })),

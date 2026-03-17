@@ -151,6 +151,51 @@ function AiChat() {
   const buildContext = (question) => {
     if (!xlsData) return "";
     const q = question.toLowerCase();
+
+    // Pre-compute full dataset summaries (always included)
+    const count = (arr, key) => {
+      const c = {};
+      arr.forEach(r => { const v = r[key]; if (v && v !== "NaN" && String(v).trim()) { const k = String(v).trim(); c[k] = (c[k] || 0) + 1; } });
+      return Object.entries(c).sort((a, b) => b[1] - a[1]);
+    };
+
+    const esitoCount = count(xlsData, "esito");
+    const intentCount = count(xlsData, "intent_principale");
+    const prodCount = count(xlsData, "prodotto_menzionato");
+    const motivoCount = count(xlsData.filter(r => r.motivo_trasferimento), "motivo_trasferimento");
+
+    const botRisposte = xlsData.filter(r => r.bot_ha_risposto === 1 || r.bot_ha_risposto === true).length;
+    const pertinenti = xlsData.filter(r => r.risposta_pertinente === 1 || r.risposta_pertinente === true).length;
+    const nonPertinenti = xlsData.filter(r => r.risposta_pertinente === 0 || r.risposta_pertinente === false).length;
+    const totIncompr = xlsData.filter(r => r.num_incomprensioni > 0).length;
+    const totKbMiss = xlsData.filter(r => r.num_kb_miss > 0).length;
+
+    // Summaries per esito for products and intents
+    const esitiList = ["GESTITA_BOT_RISOLTA","GESTITA_BOT_CHIUSA","TRANSFER_POST_RISPOSTA","TRANSFER_IMMEDIATO","TRANSFER_KB_MISS","TRANSFER_INCOMPRENSIONI","ABBANDONO"];
+    const perEsito = esitiList.map(e => {
+      const sub = xlsData.filter(r => r.esito === e);
+      return `${e} (${sub.length}): top prodotti=[${count(sub,"prodotto_menzionato").slice(0,5).map(([k,v])=>`${k}:${v}`).join(", ")}], top intent=[${count(sub,"intent_principale").slice(0,5).map(([k,v])=>`${k}:${v}`).join(", ")}]`;
+    });
+
+    let summary = `RIEPILOGO COMPLETO DATASET (${xlsData.length} conversazioni):
+
+Esiti: ${esitoCount.map(([k,v])=>`${k}:${v}`).join(", ")}
+
+Intent principali: ${intentCount.slice(0,15).map(([k,v])=>`${k}:${v}`).join(", ")}
+
+Prodotti più menzionati (top 30): ${prodCount.slice(0,30).map(([k,v])=>`${k}:${v}`).join(", ")}
+
+Motivi trasferimento: ${motivoCount.map(([k,v])=>`${k}:${v}`).join(", ")}
+
+Bot ha risposto: ${botRisposte}/${xlsData.length} (${(botRisposte/xlsData.length*100).toFixed(1)}%)
+Risposte pertinenti: ${pertinenti}, Non pertinenti: ${nonPertinenti}
+Conversazioni con incomprensioni: ${totIncompr}
+Conversazioni con KB miss: ${totKbMiss}
+
+Dettaglio per esito:
+${perEsito.join("\n")}`;
+
+    // Apply keyword filters for detailed rows
     let filtered = xlsData;
     const keywords = {
       "kb_miss": r => r.esito === "TRANSFER_KB_MISS" || r.num_kb_miss > 0,
@@ -162,10 +207,10 @@ function AiChat() {
       "risolt": r => r.esito === "GESTITA_BOT_RISOLTA",
       "chiuse": r => r.esito === "GESTITA_BOT_CHIUSA",
       "gestite": r => r.esito === "GESTITA_BOT_RISOLTA" || r.esito === "GESTITA_BOT_CHIUSA",
-      "trasferit": r => r.esito?.startsWith("TRANSFER"),
+      "trasferit": r => r.esito?.startsWith?.("TRANSFER"),
       "immediat": r => r.esito === "TRANSFER_IMMEDIATO",
       "post risposta": r => r.esito === "TRANSFER_POST_RISPOSTA",
-      "operatore": r => r.intent_principale?.includes("operatore"),
+      "operatore": r => r.intent_principale?.includes?.("operatore"),
       "abbandono": r => r.esito === "ABBANDONO",
       "lavatrice": r => String(r.prodotto_menzionato || "").toLowerCase().includes("lavatrice"),
       "telefon": r => String(r.prodotto_menzionato || "").toLowerCase().includes("telefon"),
@@ -181,32 +226,37 @@ function AiChat() {
       "garanzia": r => r.intent_principale === "garanzia",
       "negozio": r => r.intent_principale === "info_negozio" || r.intent_principale === "operatore_punto_vendita",
       "pertinent": r => r.risposta_pertinente === 1 || r.risposta_pertinente === 0,
+      "prodott": r => r.prodotto_menzionato && String(r.prodotto_menzionato).trim() !== "",
     };
 
+    let filterApplied = "nessuno (domanda generica)";
     for (const [kw, filterFn] of Object.entries(keywords)) {
       if (q.includes(kw)) {
         filtered = xlsData.filter(filterFn);
+        filterApplied = `keyword "${kw}" → ${filtered.length} righe`;
         break;
       }
     }
 
-    if (filtered.length === xlsData.length && filtered.length > 500) {
-      filtered = xlsData.slice(0, 200);
-    }
-
-    const maxRows = 150;
+    // For filtered data, include sample rows
+    const maxRows = 100;
     const sample = filtered.length > maxRows ? filtered.slice(0, maxRows) : filtered;
     const cols = ["esito","bot_ha_risposto","risposta_pertinente","num_turni_utili","num_incomprensioni","num_kb_miss","intent_principale","intent_dettaglio","motivo_trasferimento","prodotto_menzionato","note"];
-    const compact = sample.map(r => {
-      const parts = cols.map(c => {
-        const v = r[c];
-        if (v === undefined || v === null || v === "" || v === "NaN" || (typeof v === "number" && isNaN(v))) return null;
-        return `${c}=${v}`;
-      }).filter(Boolean);
-      return parts.join("|");
-    });
+    
+    let detail = "";
+    if (filtered.length < xlsData.length) {
+      const compact = sample.map(r => {
+        const parts = cols.map(c => {
+          const v = r[c];
+          if (v === undefined || v === null || v === "" || v === "NaN" || (typeof v === "number" && isNaN(v))) return null;
+          return `${c}=${v}`;
+        }).filter(Boolean);
+        return parts.join("|");
+      });
+      detail = `\n\nDETTAGLIO FILTRATO (${filterApplied}, mostrate ${sample.length}/${filtered.length}):\n${compact.join("\n")}`;
+    }
 
-    return `Dataset: ${xlsData.length} conversazioni totali.\nFiltro applicato: ${filtered.length} righe trovate (mostrate ${sample.length}).\nColonne: ${cols.join(", ")}\n\nDati:\n${compact.join("\n")}`;
+    return summary + detail;
   };
 
   const sendMessage = async () => {

@@ -618,11 +618,11 @@ export default function App() {
               </div>
 
               <ExBlock title="Esempi reali di conversazioni gestite dal bot" items={[
-                { tag: "Prezzo", text: "\"Quanto costa l'iPhone 16 Pro da 256 giga?\" — il bot propone i modelli disponibili, l'utente sceglie, il bot fornisce il prezzo. 3 turni, risolta." },
-                { tag: "Stato ordine", text: "\"Vorrei sapere lo stato della mia riparazione\" — il bot chiede numero documento e data, recupera le informazioni, conferma la data di ritiro. 4 turni." },
-                { tag: "Disponibilità", text: "\"Avete il frigorifero Hisense del volantino?\" — il bot conferma la disponibilità in negozio e fornisce i dettagli del prodotto. 2 turni." },
-                { tag: "Info prodotto", text: "\"Cerco cartucce per stampante HP Envy 6000\" — il bot guida la ricerca, propone modelli compatibili. 4 turni." },
-                { tag: "Info pagamento", text: "\"Si può comprare a rate un frigorifero?\" — il bot spiega le opzioni di finanziamento disponibili. 2 turni." },
+                { tag: "Prezzo", text: "\"Macchina da caffè automatica serie 800 Philips\" → il bot identifica il modello EP0820/00 → \"Vorrei sapere il prezzo\" → \"Il prezzo è duecentosessantanove euro. Posso aiutarla con altro?\" 2 turni, risolta." },
+                { tag: "Disponibilità", text: "\"Avete il decalcificante della De Longhi?\" → il bot risponde: \"Sì, abbiamo due decalcificanti De'Longhi: DLSC200 e DLSC500\" → \"Il filtro sempre della De Longhi\" → conferma anche il filtro. 2 turni." },
+                { tag: "Stato ordine", text: "\"Dovrei ritirare una scopa Samsung\" → il bot chiede numero documento e data → l'utente fornisce i dati → \"Lo stato della sua spedizione è disponibile al ritiro.\" L'utente chiede di ripetere, il bot conferma." },
+                { tag: "Info prodotto", text: "\"Voglio informazioni su un robot aspirapolvere\" → \"Intendi robot aspirapolvere?\" → \"Sì\" → il bot propone tre modelli con caratteristiche. L'utente sceglie e chiude soddisfatto." },
+                { tag: "Info pagamento", text: "\"Acquisto telefono finanziamento\" → il bot risponde: \"Dimo prevede vendite con Findomestic, Agos e Cofidis. Per maggiori informazioni, puoi chiedere l'intervento di un operatore dal punto vendita.\" 1 turno." },
               ]} />
 
               <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: navy, lineHeight: 1.6, borderLeft: `4px solid ${navy}` }}>
@@ -691,11 +691,11 @@ export default function App() {
               </div>
 
               <ExBlock title="Esempi reali: il bot risponde, l'utente sceglie l'operatore" items={[
-                { tag: "Assistenza", text: "\"La lavatrice che ho comprato non funziona\" — il bot spiega la procedura di assistenza, ma l'utente preferisce conferma da un operatore prima di procedere." },
-                { tag: "Reso", text: "\"Nella friggitrice manca un pezzo\" — il bot spiega come fare il reso. L'utente preferisce gestire la pratica con una persona." },
-                { tag: "Ritiro", text: "\"Cercavo questa lavatrice per ritirarla in negozio\" — il bot conferma la disponibilità, ma l'utente vuole organizzare il ritiro col punto vendita." },
-                { tag: "Garanzia", text: "\"Il telefono si è rotto dopo 6 mesi\" — il bot spiega la garanzia, ma l'utente chiede di parlare con qualcuno per gestire il caso." },
-                { tag: "Persona", text: "\"Mi passi Roberto del bancone smartphone\" — il bot non può collegare a una persona. Trasferimento inevitabile." },
+                { tag: "Assistenza", text: "\"Ho un problema col telefono nel trasferimento delle chat di WhatsApp\" → il bot risponde: \"Per problemi di questo tipo, le consiglio di parlare con un nostro operatore. Posso metterla in contatto?\" → \"Sì.\"" },
+                { tag: "Reso", text: "\"Il forno è difettoso e non va, volevo sapere come procedere\" → il bot: \"Per questo tipo di problemi, le consiglio di parlare con un nostro operatore\" → l'utente accetta il trasferimento." },
+                { tag: "Ritiro", text: "\"Avete spillatori per la birra?\" → il bot conferma il modello Innoliving → l'utente chiede il prezzo, poi l'indirizzo → \"Mi dispiace, non posso darti direttamente l'indirizzo\" → trasferimento." },
+                { tag: "Garanzia", text: "\"Vorrei sapere se il computer è ritornato perché l'ho portato in garanzia\" → il bot: \"Non posso verificare lo stato dei prodotti in assistenza\" → propone operatore → \"Sì, certo\"." },
+                { tag: "Persona", text: "\"Garanzia cellulare\" → il bot spiega la Genius Card → l'utente non è soddisfatto della risposta generica e insiste: \"Parlare con un operatore\"." },
               ]} />
 
               <div style={{ background: paleOrange, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: "#7a5500", lineHeight: 1.6, borderLeft: `4px solid ${orange}` }}>
@@ -734,11 +734,11 @@ export default function App() {
               </div>
 
               <ExBlock title="Esempi: richiesta immediata di operatore" items={[
-                { tag: "Senza motivo", text: "\"Vorrei parlare con un operatore\" — primo e unico messaggio, senza specificare il motivo della chiamata." },
-                { tag: "Punto vendita", text: "\"Mi passi il negozio per favore\" — l'utente vuole essere collegato al punto vendita, non ricevere informazioni." },
-                { tag: "Persona specifica", text: "\"Devo parlare col direttore\" / \"Mi passi Gianluca del reparto TV\" — richiesta di una persona per nome o ruolo." },
-                { tag: "Con motivo", text: "\"Ho bisogno di parlare con qualcuno per un reso\" — specifica il motivo ma vuole comunque l'operatore subito." },
-                { tag: "Assistenza", text: "\"La lavatrice è rotta, passatemi qualcuno\" — chiede direttamente l'operatore per un problema tecnico." },
+                { tag: "Senza motivo", text: "\"Devo parlare con un operatore.\" — primo e unico messaggio. Il bot risponde: \"Non ho trovato risultati pertinenti. Ti metto in contatto con un operatore.\"" },
+                { tag: "Punto vendita", text: "\"Vorrei parlare con un operatore del centro di Arma di Taggia\" — l'utente vuole essere collegato a un punto vendita specifico. Il bot trasferisce subito." },
+                { tag: "Persona specifica", text: "\"Ho bisogno di parlare con Clelia\" — richiesta di una persona per nome. Il bot: \"Certamente, ti metto subito in contatto con un operatore.\"" },
+                { tag: "Con motivo", text: "\"Vorrei parlare con un operatore un dipendente\" — il bot aveva chiesto come aiutare, ma l'utente vuole direttamente il contatto umano." },
+                { tag: "Reparto", text: "\"Eh parlare col punto vendita telefoni\" — l'utente specifica il reparto ma non dà al bot nessuna chance. Il bot: \"La metto subito in contatto.\"" },
               ]} />
 
               <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: navy, lineHeight: 1.6, borderLeft: `4px solid ${textLight}` }}>
@@ -967,19 +967,19 @@ export default function App() {
           </div>
 
           <ExBlock title="Esempi: 1 incomprensione, il bot si riprende e gestisce" items={[
-            { tag: "Info prodotto", text: "L'utente chiede un modello specifico. Il bot non capisce il nome al primo tentativo, ma alla seconda richiesta riesce a trovare il prodotto e risponde correttamente." },
-            { tag: "Prezzo", text: "L'utente pronuncia un codice modello in modo non standard. Il bot chiede di ripetere, capisce al secondo tentativo e fornisce il prezzo." },
-            { tag: "Stato ordine", text: "L'utente fornisce il numero documento in formato non riconosciuto. Il bot chiede di ripetere cifra per cifra e riesce a recuperare l'ordine." },
+            { tag: "Info prodotto", text: "\"Ho bisogno di un'informazione riguardo una fermo coperta\" → il bot: \"Non mi è chiaro cosa intendi\" → l'utente spiega: \"Coperte con dispositivi elettrici\" → il bot capisce e propone modelli di scaldasonno." },
+            { tag: "Disponibilità", text: "\"Adesso nel G 43 kuned 84 a6c\" → il bot non trova il codice esatto → propone alternative simili → l'utente ripete → il bot interpreta correttamente: \"43 QNED 86 A6C\" e trova il televisore LG." },
+            { tag: "Info prodotto", text: "\"Un televisore con la presa Scar\" → il bot: \"Intendevi presa smart?\" → l'utente spiega che serve l'ingresso SCART → il bot capisce e propone un adattatore SCART-HDMI come soluzione." },
           ]} />
           <ExBlock title="Esempi: 2 incomprensioni, esito misto" items={[
-            { tag: "Disponibilità", text: "L'utente chiede un prodotto con una pronuncia dialettale. Il bot non capisce per due volte, poi l'utente riformula in modo più chiaro e il bot risponde." },
-            { tag: "Stato ordine", text: "L'utente fornisce la data in formato non riconosciuto e poi il codice bolletta in modo poco chiaro. Dopo due incomprensioni il bot chiede l'operatore." },
+            { tag: "Disponibilità", text: "\"Volevo sapere se avete dei filtri di ricambio di una marca Marcarvinta\" → il bot: \"Non ho trovato nessun prodotto della marca Marcarvinta\" → \"Roberta la marca\" → il bot non riesce ancora a capire. La pronuncia vocale impedisce il riconoscimento." },
+            { tag: "Info prodotto", text: "\"Una scheda di acquisizione per il computer\" → il bot trova due convertitori video → l'utente chiede \"i prezzi\" → il bot: \"Posso dirti il prezzo di un prodotto alla volta\" → l'utente specifica e il bot risponde." },
           ]} />
           <ExBlock title="Esempi: 3+ incomprensioni → trasferimento forzato" items={[
-            { tag: "Persona specifica", text: "L'utente chiede di parlare con un operatore specifico. Il bot non capisce il nome dopo 3 tentativi e trasferisce automaticamente." },
-            { tag: "Stato ordine", text: "L'utente cerca di fornire i dati dell'ordine ma il bot non riesce a capire né il numero documento né la data. Dopo 3 tentativi, trasferimento." },
-            { tag: "Disponibilità", text: "L'utente chiede la disponibilità di una fotocamera Kodak FZ55. Il bot non riconosce il codice modello dopo 3 tentativi e trasferisce." },
-            { tag: "Disponibilità", text: "L'utente chiede prezzo e disponibilità di un prodotto specifico, ma il bot non comprende le richieste ripetute e trasferisce dopo 3 incomprensioni." },
+            { tag: "Stato ordine", text: "\"Vorrei sapere lo stato di riparazione del mio MacBook Air\" → il bot chiede numero documento → l'utente fornisce dati in formato non riconosciuto → dopo 3+ tentativi: \"Sì, posso parlare con un operatore umano.\"" },
+            { tag: "Stato ordine", text: "\"Vorrei sapere di una consegna di una lavatrice a nome Genti Giuseppe\" → il bot chiede il numero → l'utente si frustra: \"Ma ti rendi conto che ha detto che comprende la mia frustrazione? Dov'è il numero della bolletta, robot virtuale?\"" },
+            { tag: "Prezzo", text: "\"Prezzo sulla micro telecamera da mettere in macchina\" → il bot: \"A quale prodotto si riferisce? Posso fornirle il prezzo di un solo articolo alla volta\" → ripete 3 volte → \"Potrei parlare con un operatore.\"" },
+            { tag: "Stato ordine", text: "\"1622026 televisore da ritirare\" → il bot interpreta il numero documento ma non la data → chiede ripetutamente il formato → l'utente non riesce a fornirglielo. Trasferimento dopo 3+ incomprensioni." },
           ]} />
 
           <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: navy, lineHeight: 1.6, borderLeft: `4px solid ${navy}` }}>

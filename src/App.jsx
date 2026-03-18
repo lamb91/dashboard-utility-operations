@@ -833,9 +833,9 @@ export default function App() {
 
 
 
-        {/* ═══ 4. INCOMPRENSIONI ═══ */}
+        {/* ═══ 3. INCOMPRENSIONI ═══ */}
         <div style={{ marginBottom: "3rem" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>4. Cosa significa "incomprensione" in una conversazione</h2>
+          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>3. Cosa significa "incomprensione" in una conversazione</h2>
           <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>
             Un'incomprensione si verifica quando il bot non riesce a capire cosa ha detto l'utente — per esempio un nome di prodotto pronunciato in modo non standard, un codice modello, o una frase in dialetto. Non tutte le incomprensioni portano a un trasferimento: in molti casi il bot si riprende e conclude comunque la conversazione.
           </p>
@@ -955,9 +955,9 @@ export default function App() {
         </div>
 
 
-        {/* ═══ 5. DOMANDE ═══ */}
+        {/* ═══ 4. STRATEGIE DI WORKFLOW ═══ */}
         <div style={{ marginBottom: "3rem" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>5. Strategie di workflow</h2>
+          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>4. Strategie di workflow</h2>
           <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>Il voicebot funziona e risponde ai vostri clienti. Il passo successivo è decidere insieme come gestire tre situazioni specifiche.</p>
           {[
             { letter: "A", q: "Quando il cliente chiede subito l'operatore", ctx: `Succede nel 49,2% delle chiamate (${fmt(10629)}). L'utente non dà al bot la possibilità di rispondere.`, opt: "Il bot deve trasferire subito? Oppure chiedere prima il motivo della chiamata e provare a rispondere?", c: navy },
@@ -980,7 +980,7 @@ export default function App() {
 
         {/* ═══ 5. STRATEGIE DI INTERVENTO ═══ */}
         <div style={{ marginBottom: "3rem" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>6. Strategie di intervento sul trasferimento</h2>
+          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>5. Strategie di intervento sul trasferimento</h2>
           <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>
             Per ridurre i trasferimenti non necessari, proponiamo cinque livelli di intervento progressivi — dal più leggero al più incisivo. Ogni livello può essere attivato singolarmente o in combinazione.
           </p>
@@ -1049,7 +1049,7 @@ export default function App() {
 
         {/* ═══ 6. STIMA IMPATTO OPERATIVO (FTE) ═══ */}
         <div style={{ marginBottom: "3rem" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>7. Stima impatto operativo</h2>
+          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>6. Stima impatto operativo</h2>
           <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>
             Il voicebot interviene in circa 427 chiamate al giorno. L'impatto operativo si divide tra le conversazioni gestite interamente (3 min/chiamata) e quelle dove il bot ha risposto prima del trasferimento (2 min/chiamata).
           </p>
@@ -1126,7 +1126,7 @@ export default function App() {
 
         {/* ═══ 7. TOKEN E OTTIMIZZAZIONE COSTI ═══ */}
         <div style={{ marginBottom: "3rem" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>8. Token e ottimizzazione costi</h2>
+          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>7. Token e ottimizzazione costi</h2>
           <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>
             L'utilizzo dei token (il "carburante" dell'intelligenza artificiale) è un fattore importante per la sostenibilità economica del servizio. Ecco la situazione attuale e la proposta di ottimizzazione.
           </p>
@@ -1246,7 +1246,7 @@ export default function App() {
 
         {/* ═══ 8. PIANO OPERATIVO ═══ */}
         <div style={{ marginBottom: "2rem" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>9. Piano operativo</h2>
+          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>8. Piano operativo</h2>
           <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "12px", overflow: "hidden" }}>
             {[
               { n: "01", t: "Arricchire la knowledge base", d: `Aggiungere informazioni sui prodotti più richiesti. Può risolvere una parte significativa delle ${fmt(1215)} chiamate senza risposta.`, tag: "Priorità alta", c: red },

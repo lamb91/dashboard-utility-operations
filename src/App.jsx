@@ -495,7 +495,7 @@ export default function App() {
           </div>
 
           {/* Row 2: Gestite senza operatore — compatta */}
-          <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.4, marginBottom: "5px", letterSpacing: "0.5px" }}>GESTITE SENZA OPERATORE (27,9%)</div>
+          <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.4, marginBottom: "5px", letterSpacing: "0.5px" }}>CONVERSAZIONI GESTITE AUTONOMAMENTE DALL'AI</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: "12px" }}>
             {[
               { v: "~240", l: "Al giorno", sub: "6.019 in 25 giorni" },
@@ -512,7 +512,7 @@ export default function App() {
           </div>
 
           {/* Row 3: Bot ha risposto, utente ha chiesto operatore — compatta */}
-          <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.4, marginBottom: "5px", letterSpacing: "0.5px" }}>BOT HA RISPOSTO, UTENTE HA CHIESTO L'OPERATORE (21,6%)</div>
+          <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.4, marginBottom: "5px", letterSpacing: "0.5px" }}>CONVERSAZIONI GESTITE DALL'AI CON RICHIESTA DI PASSAGGIO AL PUNTO VENDITA</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
             {[
               { v: "~187", l: "Al giorno", sub: "4.665 in 25 giorni" },
@@ -831,39 +831,6 @@ export default function App() {
         </div>
 
 
-        {/* ═══ 3. MARGINI ═══ */}
-        <div style={{ marginBottom: "3rem" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>3. Dove si può migliorare</h2>
-          <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>
-            I limiti reali del sistema sono le informazioni mancanti e le incomprensioni. Insieme rappresentano il <strong style={{ color: navy }}>{pct(1215 + 413, T)}%</strong> del totale.
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "1.5rem" }}>
-            <div style={{ background: white, border: `1px solid ${paleNavy}`, borderRadius: "12px", padding: "1.25rem", borderLeft: `5px solid ${red}` }}>
-              <div style={{ fontSize: "26px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: red }}>{fmt(1215)}</div>
-              <div style={{ fontSize: "14px", fontWeight: 600, margin: "6px 0 8px" }}>Informazioni mancanti</div>
-              <div style={{ fontSize: "13px", color: textMid, lineHeight: 1.5 }}>Il bot ha capito la domanda ma non aveva la risposta. Si risolve arricchendo il catalogo nella knowledge base.</div>
-            </div>
-            <div style={{ background: white, border: `1px solid ${paleNavy}`, borderRadius: "12px", padding: "1.25rem", borderLeft: `5px solid ${orange}` }}>
-              <div style={{ fontSize: "26px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: orange }}>{fmt(413)}</div>
-              <div style={{ fontSize: "14px", fontWeight: 600, margin: "6px 0 8px" }}>Incomprensioni linguistiche</div>
-              <div style={{ fontSize: "13px", color: textMid, lineHeight: 1.5 }}>Il bot non ha capito l'utente. Spesso codici modello o pronunce non standard.</div>
-            </div>
-          </div>
-          <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "12px", padding: "1.25rem", marginBottom: "1.5rem" }}>
-            <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "14px" }}>Prodotti più richiesti quando manca l'informazione</div>
-            <ResponsiveContainer width="100%" height={230}>
-              <BarChart data={products} layout="vertical" margin={{ left: 10, right: 16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={paleNavy} horizontal={false} />
-                <XAxis type="number" tick={{ fill: textLight, fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" tick={{ fill: textDark, fontSize: 12 }} width={100} axisLine={false} tickLine={false} />
-                <Tooltip content={<CT />} />
-                <Bar dataKey="v" name="Menzioni" fill={red} radius={[0, 4, 4, 0]} barSize={14} fillOpacity={0.7}>
-                  {products.map((_, i) => <Cell key={i} fill={i < 3 ? red : textLight} fillOpacity={i < 3 ? 0.8 : 0.4} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
 
 
         {/* ═══ 4. INCOMPRENSIONI ═══ */}
@@ -990,7 +957,7 @@ export default function App() {
 
         {/* ═══ 5. DOMANDE ═══ */}
         <div style={{ marginBottom: "3rem" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>5. Le domande per voi</h2>
+          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>5. Strategie di workflow</h2>
           <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>Il voicebot funziona e risponde ai vostri clienti. Il passo successivo è decidere insieme come gestire tre situazioni specifiche.</p>
           {[
             { letter: "A", q: "Quando il cliente chiede subito l'operatore", ctx: `Succede nel 49,2% delle chiamate (${fmt(10629)}). L'utente non dà al bot la possibilità di rispondere.`, opt: "Il bot deve trasferire subito? Oppure chiedere prima il motivo della chiamata e provare a rispondere?", c: navy },
@@ -1084,11 +1051,11 @@ export default function App() {
         <div style={{ marginBottom: "3rem" }}>
           <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>7. Stima impatto operativo</h2>
           <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>
-            Il voicebot interviene in circa 447 chiamate al giorno. L'impatto operativo si divide tra le conversazioni gestite interamente (3 min/chiamata) e quelle dove il bot ha risposto prima del trasferimento (2 min/chiamata).
+            Il voicebot interviene in circa 427 chiamate al giorno. L'impatto operativo si divide tra le conversazioni gestite interamente (3 min/chiamata) e quelle dove il bot ha risposto prima del trasferimento (2 min/chiamata).
           </p>
 
           {/* Row 1: Gestite senza operatore */}
-          <div style={{ fontSize: "12px", fontWeight: 600, color: navy, marginBottom: "6px" }}>Gestite senza operatore (27,9%)</div>
+          <div style={{ fontSize: "12px", fontWeight: 600, color: navy, marginBottom: "6px" }}>Conversazioni gestite autonomamente dall'AI</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "12px", marginBottom: "1.25rem" }}>
             <Metric value="~240" label="Chiamate/giorno" sub="6.019 in 25 giorni" />
             <Metric value="~720 min" label="Minuti risparmiati/giorno" sub="240 × 3 min" />
@@ -1097,7 +1064,7 @@ export default function App() {
           </div>
 
           {/* Row 2: Bot ha risposto, utente ha chiesto operatore */}
-          <div style={{ fontSize: "12px", fontWeight: 600, color: orange, marginBottom: "6px" }}>Bot ha risposto, utente ha chiesto l'operatore (21,6%)</div>
+          <div style={{ fontSize: "12px", fontWeight: 600, color: orange, marginBottom: "6px" }}>Conversazioni gestite dall'AI con richiesta di passaggio al punto vendita</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "12px", marginBottom: "1.25rem" }}>
             <Metric value="~187" label="Chiamate/giorno" sub="4.665 in 25 giorni" />
             <Metric value="~374 min" label="Minuti di interazione bot" sub="187 × 2 min" />
@@ -1128,7 +1095,7 @@ export default function App() {
             <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "12px" }}>Proiezione con le strategie di intervento</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "12px" }}>
               {[
-                { scenario: "Situazione attuale", calls: "~447", hours: "~18,9h", fte: "~2,4", c: textLight },
+                { scenario: "Situazione attuale", calls: "~427", hours: "~18,2h", fte: "~2,3", c: textLight },
                 { scenario: "Con livelli 1+4 (soft + asincrono)", calls: "~560", hours: "~24h", fte: "~3,0", c: orange },
                 { scenario: "Con livelli 1-4 combinati", calls: "~680", hours: "~30h", fte: "~3,8", c: navy },
               ].map((s, i) => (

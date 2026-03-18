@@ -476,15 +476,51 @@ export default function App() {
           <p style={{ fontSize: "15px", opacity: 0.75, margin: "0 0 2rem", lineHeight: 1.6, maxWidth: "640px" }}>
             In 25 giorni il voicebot ha gestito {fmt(T)} chiamate. Questo report mostra i risultati, dove il bot eccelle e i margini di miglioramento.
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "12px" }}>
+
+          {/* Row 1: Gestite senza operatore */}
+          <div style={{ fontSize: "11px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.5, marginBottom: "6px", letterSpacing: "0.5px" }}>GESTITE SENZA OPERATORE (27,9%)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "16px" }}>
             {[
-              { v: "~860", l: "Chiamate al giorno" },
-              { v: "~240", l: "Gestite senza operatore" },
+              { v: "~240", l: "Al giorno", sub: "6.019 in 25 giorni" },
               { v: "~12h", l: "Ore risparmiate al giorno", hi: true, sub: "stima 3 min/chiamata" },
               { v: "~1,5", l: "FTE equivalenti", hi: true, sub: "operatori a tempo pieno" },
               { v: "79,4%", l: "Risposte pertinenti", hi: true },
             ].map((m, i) => (
               <div key={i} style={{ background: "rgba(255,255,255,0.1)", borderRadius: "10px", padding: "14px 16px" }}>
+                <div style={{ fontSize: "22px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: m.hi ? orange : white }}>{m.v}</div>
+                <div style={{ fontSize: "12px", opacity: 0.7, marginTop: "4px" }}>{m.l}</div>
+                {m.sub && <div style={{ fontSize: "10px", opacity: 0.5, marginTop: "2px" }}>{m.sub}</div>}
+              </div>
+            ))}
+          </div>
+
+          {/* Row 2: Bot ha risposto, utente ha chiesto operatore */}
+          <div style={{ fontSize: "11px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.5, marginBottom: "6px", letterSpacing: "0.5px" }}>BOT HA RISPOSTO, UTENTE HA CHIESTO L'OPERATORE (23,9%)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "16px" }}>
+            {[
+              { v: "~207", l: "Al giorno", sub: "5.170 in 25 giorni" },
+              { v: "~6,9h", l: "Ore di interazione bot/giorno", hi: true, sub: "stima 2 min/chiamata" },
+              { v: "~0,9", l: "FTE equivalenti", hi: true, sub: "operatori a tempo pieno" },
+              { v: "90,4%", l: "Risposte pertinenti", hi: true, sub: "su 2.782 valutate" },
+            ].map((m, i) => (
+              <div key={i} style={{ background: "rgba(255,255,255,0.08)", borderRadius: "10px", padding: "14px 16px", borderLeft: `3px solid ${orange}` }}>
+                <div style={{ fontSize: "22px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: m.hi ? orange : white }}>{m.v}</div>
+                <div style={{ fontSize: "12px", opacity: 0.7, marginTop: "4px" }}>{m.l}</div>
+                {m.sub && <div style={{ fontSize: "10px", opacity: 0.5, marginTop: "2px" }}>{m.sub}</div>}
+              </div>
+            ))}
+          </div>
+
+          {/* Row 3: Totale */}
+          <div style={{ fontSize: "11px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.5, marginBottom: "6px", letterSpacing: "0.5px" }}>RIEPILOGO GIORNALIERO</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
+            {[
+              { v: "~860", l: "Chiamate totali al giorno", sub: `${fmt(T)} in 25 giorni` },
+              { v: "~447", l: "Il bot ha lavorato", hi: true, sub: "240 gestite + 207 parziali" },
+              { v: "51,8%", l: "Tasso di intervento bot", hi: true, sub: "27,9% + 23,9%" },
+              { v: "~2,4", l: "FTE totali equivalenti", hi: true, sub: "1,5 + 0,9 FTE" },
+            ].map((m, i) => (
+              <div key={i} style={{ background: "rgba(255,255,255,0.15)", borderRadius: "10px", padding: "14px 16px" }}>
                 <div style={{ fontSize: "22px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: m.hi ? orange : white }}>{m.v}</div>
                 <div style={{ fontSize: "12px", opacity: 0.7, marginTop: "4px" }}>{m.l}</div>
                 {m.sub && <div style={{ fontSize: "10px", opacity: 0.5, marginTop: "2px" }}>{m.sub}</div>}
@@ -582,11 +618,11 @@ export default function App() {
               </div>
 
               <ExBlock title="Esempi reali di conversazioni gestite dal bot" items={[
-                { tag: "Prezzo", text: "\"Macchina da caffè automatica serie 800 Philips\" → il bot identifica il modello EP0820/00 → \"Vorrei sapere il prezzo\" → \"Il prezzo è duecentosessantanove euro. Posso aiutarla con altro?\" 2 turni, risolta." },
-                { tag: "Disponibilità", text: "\"Avete il decalcificante della De Longhi?\" → il bot risponde: \"Sì, abbiamo due decalcificanti De'Longhi: DLSC200 e DLSC500\" → \"Il filtro sempre della De Longhi\" → conferma anche il filtro. 2 turni." },
-                { tag: "Stato ordine", text: "\"Dovrei ritirare una scopa Samsung\" → il bot chiede numero documento e data → l'utente fornisce i dati → \"Lo stato della sua spedizione è disponibile al ritiro.\" L'utente chiede di ripetere, il bot conferma." },
-                { tag: "Info prodotto", text: "\"Voglio informazioni su un robot aspirapolvere\" → \"Intendi robot aspirapolvere?\" → \"Sì\" → il bot propone tre modelli con caratteristiche. L'utente sceglie e chiude soddisfatto." },
-                { tag: "Info pagamento", text: "\"Acquisto telefono finanziamento\" → il bot risponde: \"Dimo prevede vendite con Findomestic, Agos e Cofidis. Per maggiori informazioni, puoi chiedere l'intervento di un operatore dal punto vendita.\" 1 turno." },
+                { tag: "Prezzo", text: "\"Quanto costa l'iPhone 16 Pro da 256 giga?\" — il bot propone i modelli disponibili, l'utente sceglie, il bot fornisce il prezzo. 3 turni, risolta." },
+                { tag: "Stato ordine", text: "\"Vorrei sapere lo stato della mia riparazione\" — il bot chiede numero documento e data, recupera le informazioni, conferma la data di ritiro. 4 turni." },
+                { tag: "Disponibilità", text: "\"Avete il frigorifero Hisense del volantino?\" — il bot conferma la disponibilità in negozio e fornisce i dettagli del prodotto. 2 turni." },
+                { tag: "Info prodotto", text: "\"Cerco cartucce per stampante HP Envy 6000\" — il bot guida la ricerca, propone modelli compatibili. 4 turni." },
+                { tag: "Info pagamento", text: "\"Si può comprare a rate un frigorifero?\" — il bot spiega le opzioni di finanziamento disponibili. 2 turni." },
               ]} />
 
               <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: navy, lineHeight: 1.6, borderLeft: `4px solid ${navy}` }}>
@@ -655,11 +691,11 @@ export default function App() {
               </div>
 
               <ExBlock title="Esempi reali: il bot risponde, l'utente sceglie l'operatore" items={[
-                { tag: "Assistenza", text: "\"Ho un problema col telefono nel trasferimento delle chat di WhatsApp\" → il bot risponde: \"Per problemi di questo tipo, le consiglio di parlare con un nostro operatore. Posso metterla in contatto?\" → \"Sì.\"" },
-                { tag: "Reso", text: "\"Il forno è difettoso e non va, volevo sapere come procedere\" → il bot: \"Per questo tipo di problemi, le consiglio di parlare con un nostro operatore\" → l'utente accetta il trasferimento." },
-                { tag: "Ritiro", text: "\"Avete spillatori per la birra?\" → il bot conferma il modello Innoliving → l'utente chiede il prezzo, poi l'indirizzo → \"Mi dispiace, non posso darti direttamente l'indirizzo\" → trasferimento." },
-                { tag: "Garanzia", text: "\"Vorrei sapere se il computer è ritornato perché l'ho portato in garanzia\" → il bot: \"Non posso verificare lo stato dei prodotti in assistenza\" → propone operatore → \"Sì, certo\"." },
-                { tag: "Persona", text: "\"Garanzia cellulare\" → il bot spiega la Genius Card → l'utente non è soddisfatto della risposta generica e insiste: \"Parlare con un operatore\"." },
+                { tag: "Assistenza", text: "\"La lavatrice che ho comprato non funziona\" — il bot spiega la procedura di assistenza, ma l'utente preferisce conferma da un operatore prima di procedere." },
+                { tag: "Reso", text: "\"Nella friggitrice manca un pezzo\" — il bot spiega come fare il reso. L'utente preferisce gestire la pratica con una persona." },
+                { tag: "Ritiro", text: "\"Cercavo questa lavatrice per ritirarla in negozio\" — il bot conferma la disponibilità, ma l'utente vuole organizzare il ritiro col punto vendita." },
+                { tag: "Garanzia", text: "\"Il telefono si è rotto dopo 6 mesi\" — il bot spiega la garanzia, ma l'utente chiede di parlare con qualcuno per gestire il caso." },
+                { tag: "Persona", text: "\"Mi passi Roberto del bancone smartphone\" — il bot non può collegare a una persona. Trasferimento inevitabile." },
               ]} />
 
               <div style={{ background: paleOrange, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: "#7a5500", lineHeight: 1.6, borderLeft: `4px solid ${orange}` }}>
@@ -698,11 +734,11 @@ export default function App() {
               </div>
 
               <ExBlock title="Esempi: richiesta immediata di operatore" items={[
-                { tag: "Senza motivo", text: "\"Devo parlare con un operatore.\" — primo e unico messaggio. Il bot risponde: \"Non ho trovato risultati pertinenti. Ti metto in contatto con un operatore.\"" },
-                { tag: "Punto vendita", text: "\"Vorrei parlare con un operatore del centro di Arma di Taggia\" — l'utente vuole essere collegato a un punto vendita specifico. Il bot trasferisce subito." },
-                { tag: "Persona specifica", text: "\"Ho bisogno di parlare con Clelia\" — richiesta di una persona per nome. Il bot: \"Certamente, ti metto subito in contatto con un operatore.\"" },
-                { tag: "Con motivo", text: "\"Vorrei parlare con un operatore un dipendente\" — il bot aveva chiesto come aiutare, ma l'utente vuole direttamente il contatto umano." },
-                { tag: "Reparto", text: "\"Eh parlare col punto vendita telefoni\" — l'utente specifica il reparto ma non dà al bot nessuna chance. Il bot: \"La metto subito in contatto.\"" },
+                { tag: "Senza motivo", text: "\"Vorrei parlare con un operatore\" — primo e unico messaggio, senza specificare il motivo della chiamata." },
+                { tag: "Punto vendita", text: "\"Mi passi il negozio per favore\" — l'utente vuole essere collegato al punto vendita, non ricevere informazioni." },
+                { tag: "Persona specifica", text: "\"Devo parlare col direttore\" / \"Mi passi Gianluca del reparto TV\" — richiesta di una persona per nome o ruolo." },
+                { tag: "Con motivo", text: "\"Ho bisogno di parlare con qualcuno per un reso\" — specifica il motivo ma vuole comunque l'operatore subito." },
+                { tag: "Assistenza", text: "\"La lavatrice è rotta, passatemi qualcuno\" — chiede direttamente l'operatore per un problema tecnico." },
               ]} />
 
               <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: navy, lineHeight: 1.6, borderLeft: `4px solid ${textLight}` }}>
@@ -931,19 +967,19 @@ export default function App() {
           </div>
 
           <ExBlock title="Esempi: 1 incomprensione, il bot si riprende e gestisce" items={[
-            { tag: "Info prodotto", text: "\"Ho bisogno di un'informazione riguardo una fermo coperta\" → il bot: \"Non mi è chiaro cosa intendi\" → l'utente spiega: \"Coperte con dispositivi elettrici\" → il bot capisce e propone modelli di scaldasonno." },
-            { tag: "Disponibilità", text: "\"Adesso nel G 43 kuned 84 a6c\" → il bot non trova il codice esatto → propone alternative simili → l'utente ripete → il bot interpreta correttamente: \"43 QNED 86 A6C\" e trova il televisore LG." },
-            { tag: "Info prodotto", text: "\"Un televisore con la presa Scar\" → il bot: \"Intendevi presa smart?\" → l'utente spiega che serve l'ingresso SCART → il bot capisce e propone un adattatore SCART-HDMI come soluzione." },
+            { tag: "Info prodotto", text: "L'utente chiede un modello specifico. Il bot non capisce il nome al primo tentativo, ma alla seconda richiesta riesce a trovare il prodotto e risponde correttamente." },
+            { tag: "Prezzo", text: "L'utente pronuncia un codice modello in modo non standard. Il bot chiede di ripetere, capisce al secondo tentativo e fornisce il prezzo." },
+            { tag: "Stato ordine", text: "L'utente fornisce il numero documento in formato non riconosciuto. Il bot chiede di ripetere cifra per cifra e riesce a recuperare l'ordine." },
           ]} />
           <ExBlock title="Esempi: 2 incomprensioni, esito misto" items={[
-            { tag: "Disponibilità", text: "\"Volevo sapere se avete dei filtri di ricambio di una marca Marcarvinta\" → il bot: \"Non ho trovato nessun prodotto della marca Marcarvinta\" → \"Roberta la marca\" → il bot non riesce ancora a capire. La pronuncia vocale impedisce il riconoscimento." },
-            { tag: "Info prodotto", text: "\"Una scheda di acquisizione per il computer\" → il bot trova due convertitori video → l'utente chiede \"i prezzi\" → il bot: \"Posso dirti il prezzo di un prodotto alla volta\" → l'utente specifica e il bot risponde." },
+            { tag: "Disponibilità", text: "L'utente chiede un prodotto con una pronuncia dialettale. Il bot non capisce per due volte, poi l'utente riformula in modo più chiaro e il bot risponde." },
+            { tag: "Stato ordine", text: "L'utente fornisce la data in formato non riconosciuto e poi il codice bolletta in modo poco chiaro. Dopo due incomprensioni il bot chiede l'operatore." },
           ]} />
           <ExBlock title="Esempi: 3+ incomprensioni → trasferimento forzato" items={[
-            { tag: "Stato ordine", text: "\"Vorrei sapere lo stato di riparazione del mio MacBook Air\" → il bot chiede numero documento → l'utente fornisce dati in formato non riconosciuto → dopo 3+ tentativi: \"Sì, posso parlare con un operatore umano.\"" },
-            { tag: "Stato ordine", text: "\"Vorrei sapere di una consegna di una lavatrice a nome Genti Giuseppe\" → il bot chiede il numero → l'utente si frustra: \"Ma ti rendi conto che ha detto che comprende la mia frustrazione? Dov'è il numero della bolletta, robot virtuale?\"" },
-            { tag: "Prezzo", text: "\"Prezzo sulla micro telecamera da mettere in macchina\" → il bot: \"A quale prodotto si riferisce? Posso fornirle il prezzo di un solo articolo alla volta\" → ripete 3 volte → \"Potrei parlare con un operatore.\"" },
-            { tag: "Stato ordine", text: "\"1622026 televisore da ritirare\" → il bot interpreta il numero documento ma non la data → chiede ripetutamente il formato → l'utente non riesce a fornirglielo. Trasferimento dopo 3+ incomprensioni." },
+            { tag: "Persona specifica", text: "L'utente chiede di parlare con un operatore specifico. Il bot non capisce il nome dopo 3 tentativi e trasferisce automaticamente." },
+            { tag: "Stato ordine", text: "L'utente cerca di fornire i dati dell'ordine ma il bot non riesce a capire né il numero documento né la data. Dopo 3 tentativi, trasferimento." },
+            { tag: "Disponibilità", text: "L'utente chiede la disponibilità di una fotocamera Kodak FZ55. Il bot non riconosce il codice modello dopo 3 tentativi e trasferisce." },
+            { tag: "Disponibilità", text: "L'utente chiede prezzo e disponibilità di un prodotto specifico, ma il bot non comprende le richieste ripetute e trasferisce dopo 3 incomprensioni." },
           ]} />
 
           <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: navy, lineHeight: 1.6, borderLeft: `4px solid ${navy}` }}>
@@ -1048,23 +1084,53 @@ export default function App() {
         <div style={{ marginBottom: "3rem" }}>
           <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>7. Stima impatto operativo</h2>
           <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>
-            Il voicebot gestisce circa 240 chiamate al giorno senza operatore. Stimando una durata media di 3 minuti per chiamata, il risparmio operativo è significativo.
+            Il voicebot interviene in circa 447 chiamate al giorno. L'impatto operativo si divide tra le conversazioni gestite interamente (3 min/chiamata) e quelle dove il bot ha risposto prima del trasferimento (2 min/chiamata).
           </p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "12px", marginBottom: "1.5rem" }}>
-            <Metric value="~240" label="Chiamate gestite/giorno" sub="senza operatore" />
+          {/* Row 1: Gestite senza operatore */}
+          <div style={{ fontSize: "12px", fontWeight: 600, color: navy, marginBottom: "6px" }}>Gestite senza operatore (27,9%)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "12px", marginBottom: "1.25rem" }}>
+            <Metric value="~240" label="Chiamate/giorno" sub="6.019 in 25 giorni" />
             <Metric value="~720 min" label="Minuti risparmiati/giorno" sub="240 × 3 min" />
-            <Metric value="~12h" label="Ore lavoro risparmiate/giorno" sub="equivalente operatore" />
+            <Metric value="~12h" label="Ore risparmiate/giorno" sub="equivalente operatore" />
             <Metric value="~1,5 FTE" label="Operatori equivalenti" sub="su turno 8h" />
+          </div>
+
+          {/* Row 2: Bot ha risposto, utente ha chiesto operatore */}
+          <div style={{ fontSize: "12px", fontWeight: 600, color: orange, marginBottom: "6px" }}>Bot ha risposto, utente ha chiesto l'operatore (23,9%)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "12px", marginBottom: "1.25rem" }}>
+            <Metric value="~207" label="Chiamate/giorno" sub="5.170 in 25 giorni" />
+            <Metric value="~414 min" label="Minuti di interazione bot" sub="207 × 2 min" />
+            <Metric value="~6,9h" label="Ore di interazione bot/giorno" sub="tempo gestito dal bot" />
+            <Metric value="~0,9 FTE" label="Operatori equivalenti" sub="su turno 8h" />
+          </div>
+
+          {/* Row 3: Totale */}
+          <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "12px", padding: "1.25rem", marginBottom: "1.5rem", background: paleNavy }}>
+            <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "12px" }}>Impatto operativo totale</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "12px" }}>
+              {[
+                { v: "~447", l: "Chiamate gestite dal bot/giorno", sub: "240 + 207" },
+                { v: "~1.134 min", l: "Minuti totali/giorno", sub: "720 + 414" },
+                { v: "~18,9h", l: "Ore totali/giorno", sub: "12h + 6,9h" },
+                { v: "~2,4 FTE", l: "Operatori equivalenti totali", sub: "1,5 + 0,9" },
+              ].map((m, i) => (
+                <div key={i} style={{ background: white, borderRadius: "8px", padding: "12px" }}>
+                  <div style={{ fontSize: "20px", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", color: navy }}>{m.v}</div>
+                  <div style={{ fontSize: "12px", color: textMid, marginTop: "4px" }}>{m.l}</div>
+                  <div style={{ fontSize: "11px", color: textLight, marginTop: "2px" }}>{m.sub}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "12px", padding: "1.25rem", marginBottom: "1.5rem" }}>
             <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "12px" }}>Proiezione con le strategie di intervento</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "12px" }}>
               {[
-                { scenario: "Situazione attuale", calls: "~240", hours: "~12h", fte: "~1,5", c: textLight },
-                { scenario: "Con livelli 1+4 (soft + asincrono)", calls: "~340", hours: "~17h", fte: "~2,1", c: orange },
-                { scenario: "Con livelli 1-4 combinati", calls: "~450", hours: "~22,5h", fte: "~2,8", c: navy },
+                { scenario: "Situazione attuale", calls: "~447", hours: "~18,9h", fte: "~2,4", c: textLight },
+                { scenario: "Con livelli 1+4 (soft + asincrono)", calls: "~560", hours: "~24h", fte: "~3,0", c: orange },
+                { scenario: "Con livelli 1-4 combinati", calls: "~680", hours: "~30h", fte: "~3,8", c: navy },
               ].map((s, i) => (
                 <div key={i} style={{ background: white, border: `1px solid ${paleNavy}`, borderRadius: "10px", padding: "1rem", borderTop: `4px solid ${s.c}` }}>
                   <div style={{ fontSize: "12px", fontWeight: 600, color: s.c, marginBottom: "10px" }}>{s.scenario}</div>
@@ -1086,7 +1152,7 @@ export default function App() {
           </div>
 
           <div style={{ background: paleOrange, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: "#7a5500", lineHeight: 1.6, borderLeft: `4px solid ${orange}` }}>
-            <strong>Con le strategie soft e asincrone (livelli 1+4) il risparmio può salire a oltre 2 FTE.</strong> Combinando tutti i livelli di intervento, il voicebot potrebbe gestire fino a 450 chiamate al giorno, equivalenti a quasi 3 operatori a tempo pieno.
+            <strong>Già oggi il voicebot equivale a ~2,4 operatori a tempo pieno.</strong> Con le strategie soft e asincrone (livelli 1+4) il risparmio può salire a 3 FTE. Combinando tutti i livelli di intervento si arriva a quasi 4 FTE equivalenti.
           </div>
         </div>
 
@@ -1103,7 +1169,6 @@ export default function App() {
             {[
               { icon: "📊", t: "Stima iniziale molto contenuta", d: "La stima iniziale del consumo di token era basata su una base dati (catalogo aziendale) significativamente più piccola rispetto a quella effettivamente caricata. Il volume reale di dati da processare ha superato le previsioni iniziali." },
               { icon: "🔄", t: "Interazione su più temi", d: "Il voicebot gestisce argomenti molto diversi tra loro — disponibilità, ordini, prezzi, assistenza, informazioni negozio — che sono stati introdotti gradualmente. Ogni tema aggiuntivo aumenta il contesto che il modello deve processare ad ogni turno." },
-              { icon: "🎯", t: "Livello di comprensione e risposta molto elevato", d: "Il modello di intelligenza artificiale utilizzato garantisce un'elevata qualità nelle risposte (79,4% di pertinenza), ma richiede un consumo di token superiore rispetto a modelli meno performanti." },
               { icon: "🗣️", t: "Scelta di voci di livello superiore", d: "Le voci di sintesi vocale selezionate per il voicebot sono di qualità premium, offrendo un'esperienza più naturale all'utente ma con un costo unitario più alto." },
             ].map((item, i) => (
               <div key={i} style={{ display: "flex", gap: "14px", padding: "1rem 1.25rem", borderTop: `1px solid ${paleNavy}`, background: i % 2 === 0 ? white : paleNavy, alignItems: "flex-start" }}>
@@ -1117,39 +1182,88 @@ export default function App() {
           </div>
 
           <div style={{ border: `1px solid ${orange}40`, borderRadius: "12px", overflow: "hidden", marginBottom: "1.5rem" }}>
-            <div style={{ background: orange, color: white, padding: "14px 20px", fontSize: "14px", fontWeight: 600 }}>Proposta di ottimizzazione: Smart RAG</div>
+            <div style={{ background: orange, color: white, padding: "14px 20px", fontSize: "14px", fontWeight: 600 }}>Proposta di ottimizzazione: Smart RAG + Tool Routing</div>
             <div style={{ padding: "1.25rem" }}>
-              <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1rem" }}>
-                Proponiamo l'introduzione di un sistema di <strong style={{ color: navy }}>Smart RAG</strong> (Retrieval-Augmented Generation intelligente) che riduce significativamente il consumo di token ottimizzando il modo in cui il voicebot accede al catalogo.
+              <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>
+                Proponiamo l'introduzione di un sistema evoluto di <strong style={{ color: navy }}>Smart RAG</strong> integrato con <strong style={{ color: navy }}>tool calling intelligente</strong> ("attività"), che ottimizza il consumo di token e migliora l'efficienza del voicebot intervenendo <strong style={{ color: navy }}>prima</strong> della generazione della risposta.
               </p>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "1rem" }}>
+              {/* Come funziona oggi vs Smart RAG */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "1.25rem" }}>
                 <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem" }}>
                   <div style={{ fontSize: "13px", fontWeight: 600, color: navy, marginBottom: "8px" }}>Come funziona oggi</div>
                   <div style={{ fontSize: "13px", color: textMid, lineHeight: 1.6 }}>
-                    Ad ogni turno il modello riceve l'intero contesto del catalogo per trovare la risposta. Questo significa processare migliaia di token anche per domande semplici.
+                    Ad ogni turno, il modello riceve un contesto esteso (catalogo, documentazione, FAQ) e lo elabora per generare una risposta. Questo comporta elevato consumo di token anche per richieste semplici, utilizzo inefficiente del modello e tempi di risposta più lunghi.
                   </div>
                 </div>
                 <div style={{ background: paleOrange, borderRadius: "10px", padding: "1rem" }}>
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#7a5500", marginBottom: "8px" }}>Come funzionerà con Smart RAG</div>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#7a5500", marginBottom: "8px" }}>Come funziona con Smart RAG + Tool Routing</div>
                   <div style={{ fontSize: "13px", color: textMid, lineHeight: 1.6 }}>
-                    Il sistema cerca prima le informazioni rilevanti e passa al modello solo la porzione necessaria. Riduce drasticamente i token per turno, mantenendo la stessa qualità di risposta.
+                    Il sistema introduce una fase iniziale di orchestrazione intelligente che decide come gestire la richiesta <strong>prima</strong> di coinvolgere il modello in modo pesante. Non è più un modello che "legge tutto ogni volta" — è un sistema che capisce, sceglie e agisce.
                   </div>
                 </div>
               </div>
 
+              {/* 3 steps */}
+              <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "10px", overflow: "hidden", marginBottom: "1.25rem" }}>
+                {[
+                  { n: "1", t: "Routing intelligente (zero/low token)", c: navy, points: [
+                    { label: "Risposta diretta", desc: "Per interazioni semplici (saluti, conferme, chit-chat) — nessun RAG, nessun tool, consumo minimo" },
+                    { label: "Attivazione attività (tool calling)", desc: "Per azioni operative (trasferimento chiamata, apertura ticket, integrazione con sistemi esterni) — eseguite con consumo minimo di token" },
+                    { label: "Attivazione RAG (elly_searchrag)", desc: "Solo per richieste informative o tecniche che richiedono consultazione della knowledge base" },
+                  ]},
+                  { n: "2", t: "Recupero mirato delle informazioni (Smart RAG)", c: orange, points: [
+                    { label: "Query ottimizzata", desc: "Il sistema costruisce una query di ricerca precisa dalla richiesta dell'utente" },
+                    { label: "Contenuti rilevanti", desc: "Recupera solo la porzione necessaria dalla knowledge base" },
+                    { label: "Contesto ridotto", desc: "Riduce drasticamente il contesto passato al modello" },
+                  ]},
+                  { n: "3", t: "Generazione controllata della risposta", c: "#2e86c1", points: [
+                    { label: "Solo informazioni utili", desc: "Il modello riceve solo i dati rilevanti, non l'intero catalogo" },
+                    { label: "Risponde sui dati disponibili", desc: "Evita allucinazioni rispondendo esclusivamente sulle informazioni recuperate" },
+                    { label: "Chiede chiarimenti", desc: "Se la richiesta è ambigua, chiede all'utente di specificare invece di inventare" },
+                  ]},
+                ].map((step, i) => (
+                  <div key={i} style={{ padding: "1rem 1.25rem", borderTop: i > 0 ? `1px solid ${paleNavy}` : "none", background: i % 2 === 0 ? white : paleNavy }}>
+                    <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "18px", fontWeight: 700, color: step.c, minWidth: "28px" }}>{step.n}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: "13px", fontWeight: 600, color: navy, marginBottom: "8px" }}>{step.t}</div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                          {step.points.map((p, j) => (
+                            <div key={j} style={{ display: "flex", gap: "8px", alignItems: "flex-start", fontSize: "13px", lineHeight: 1.5 }}>
+                              <span style={{ color: step.c, marginTop: "3px", fontSize: "8px" }}>●</span>
+                              <span><strong style={{ color: navy }}>{p.label}:</strong> <span style={{ color: textMid }}>{p.desc}</span></span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Cosa cambia davvero */}
+              <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", marginBottom: "1.25rem" }}>
+                <div style={{ fontSize: "13px", fontWeight: 600, color: navy, marginBottom: "8px" }}>Cosa cambia davvero</div>
+                <div style={{ fontSize: "13px", color: textMid, lineHeight: 1.6 }}>
+                  Non è più un modello che "legge tutto ogni volta". È un sistema che: <strong style={{ color: navy }}>1)</strong> capisce cosa vuoi fare (rispondere, cercare, agire), <strong style={{ color: navy }}>2)</strong> sceglie il percorso più economico ed efficace, <strong style={{ color: navy }}>3)</strong> usa il modello solo quando serve davvero.
+                </div>
+              </div>
+
+              {/* Impatto atteso */}
               <div style={{ background: white, border: `1px solid ${paleNavy}`, borderRadius: "10px", padding: "1rem" }}>
                 <div style={{ fontSize: "13px", fontWeight: 600, color: navy, marginBottom: "8px" }}>Impatto atteso</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   {[
-                    "Riduzione significativa del consumo di token per conversazione",
-                    "Mantenimento dello stesso livello di qualità delle risposte",
-                    "Possibile lieve aumento del numero di turni per conversazione (il bot potrebbe fare una domanda in più per affinare la ricerca)",
-                    "Tempo di risposta più rapido grazie al contesto ridotto",
+                    { t: "Riduzione drastica del consumo di token", d: "meno contesto + meno uso del modello quando non necessario" },
+                    { t: "Ottimizzazione dei costi operativi", d: "le attività vengono gestite senza passare dal modello generativo" },
+                    { t: "Maggiore velocità di risposta", d: "routing leggero + contesto ridotto" },
+                    { t: "Qualità delle risposte invariata o migliorata", d: "grazie a retrieval mirato e vincoli sul modello" },
+                    { t: "Maggiore scalabilità del sistema", d: "separazione tra logica, ricerca e generazione" },
                   ].map((p, i) => (
-                    <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", fontSize: "13px", color: textMid, lineHeight: 1.6 }}>
-                      <span style={{ color: orange, marginTop: "2px", fontSize: "8px" }}>●</span>
-                      <span>{p}</span>
+                    <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", fontSize: "13px", lineHeight: 1.5 }}>
+                      <span style={{ color: orange, marginTop: "3px", fontSize: "8px" }}>●</span>
+                      <span><strong style={{ color: navy }}>{p.t}</strong> <span style={{ color: textMid }}>— {p.d}</span></span>
                     </div>
                   ))}
                 </div>
@@ -1158,7 +1272,7 @@ export default function App() {
           </div>
 
           <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: navy, lineHeight: 1.6, borderLeft: `4px solid ${navy}` }}>
-            <strong>Lo Smart RAG è la soluzione tecnica che consigliamo</strong> per ottimizzare il rapporto costi/qualità del servizio. L'implementazione non richiede modifiche al flusso conversazionale visibile all'utente: è una ottimizzazione trasparente lato infrastruttura.
+            <strong>Smart RAG + Tool Routing è la soluzione tecnica che consigliamo</strong> per ottimizzare il rapporto costi/qualità del servizio. L'implementazione non richiede modifiche al flusso conversazionale visibile all'utente: è un'ottimizzazione trasparente lato infrastruttura che interviene prima della generazione, riducendo i costi e migliorando i tempi di risposta.
           </div>
         </div>
 
@@ -1169,7 +1283,7 @@ export default function App() {
           <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "12px", overflow: "hidden" }}>
             {[
               { n: "01", t: "Arricchire la knowledge base", d: `Aggiungere informazioni sui prodotti più richiesti. Può risolvere una parte significativa delle ${fmt(1333)} chiamate senza risposta.`, tag: "Priorità alta", c: red },
-              { n: "02", t: "Implementare Smart RAG", d: "Ridurre il consumo di token ottimizzando l'accesso al catalogo, senza impatto sulla qualità delle risposte.", tag: "Priorità alta", c: red },
+              { n: "02", t: "Implementare Smart RAG + Tool Routing", d: "Introdurre orchestrazione intelligente con routing, recupero mirato dalla KB e tool calling per ridurre drasticamente il consumo di token e i costi operativi.", tag: "Priorità alta", c: red },
               { n: "03", t: "Attivare strategia soft + asincrona (livelli 1+4)", d: "Dissuasione gentile del trasferimento e gestione asincrona delle richieste. Il primo passo per ridurre i trasferimenti non necessari.", tag: "Priorità alta", c: orange },
               { n: "04", t: "Affinare la pertinenza delle risposte", d: "Il 9,6% delle risposte valutate non è pertinente. Migliorando prompt e matching si può alzare la qualità.", tag: "Priorità media", c: orange },
               { n: "05", t: "Configurare i livelli di intervento 2-3", d: "Sulla base dei risultati dei primi interventi, attivare progressivamente i livelli più incisivi.", tag: "Prossimo passo", c: navy },

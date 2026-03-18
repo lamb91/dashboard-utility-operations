@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, PieChart, Pie } from "recharts";
 import * as XLSX from "xlsx";
 
-const T = 21599;
+const T = 21598;
 const fmt = (n) => typeof n === "number" ? n.toLocaleString("it-IT") : n;
 const pct = (a, b) => ((a / b) * 100).toFixed(1);
 
@@ -106,18 +106,18 @@ const cat50products = [
 ];
 
 const catImmIntents = [
-  { name: "Op. senza motivo", v: 6222 }, { name: "Punto vendita", v: 1478 },
-  { name: "Persona specifica", v: 1165 }, { name: "Op. con motivo", v: 700 },
-  { name: "Assist. tecnica", v: 356 }, { name: "Info negozio", v: 86 },
+  { name: "Op. senza motivo", v: 6530 }, { name: "Punto vendita", v: 1550 },
+  { name: "Persona specifica", v: 1222 }, { name: "Op. con motivo", v: 734 },
+  { name: "Assist. tecnica", v: 374 }, { name: "Info negozio", v: 90 },
 ];
 const catKBintents = [
-  { name: "Disponibilità", v: 309 }, { name: "Stato ordine", v: 199 }, { name: "Altro", v: 148 },
-  { name: "Op. senza motivo", v: 141 }, { name: "Info prodotto", v: 113 },
-  { name: "Assist. tecnica", v: 93 }, { name: "Info negozio", v: 70 },
+  { name: "Disponibilità", v: 282 }, { name: "Stato ordine", v: 181 }, { name: "Altro", v: 135 },
+  { name: "Info prodotto", v: 103 }, { name: "Assist. tecnica", v: 85 },
+  { name: "Info negozio", v: 64 }, { name: "Prezzo", v: 56 },
 ];
 const catKBproducts = [
-  { name: "Lavatrice", v: 46 }, { name: "Televisore", v: 19 }, { name: "Lavastoviglie", v: 15 },
-  { name: "Frigo", v: 13 }, { name: "Computer", v: 11 }, { name: "Frigorifero", v: 10 },
+  { name: "Lavatrice", v: 42 }, { name: "Televisore", v: 17 }, { name: "Lavastoviglie", v: 14 },
+  { name: "Frigo", v: 12 }, { name: "Computer", v: 10 }, { name: "Frigorifero", v: 9 },
 ];
 
 // ═══ AI CHAT COMPONENT ═══
@@ -477,53 +477,53 @@ export default function App() {
             In 25 giorni il voicebot ha gestito {fmt(T)} chiamate. Questo report mostra i risultati, dove il bot eccelle e i margini di miglioramento.
           </p>
 
-          {/* Row 1: Gestite senza operatore */}
-          <div style={{ fontSize: "11px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.5, marginBottom: "6px", letterSpacing: "0.5px" }}>GESTITE SENZA OPERATORE (27,9%)</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "16px" }}>
+          {/* Row 1: TOTALI — in alto, prominente */}
+          <div style={{ fontSize: "11px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.5, marginBottom: "6px", letterSpacing: "0.5px" }}>RIEPILOGO GIORNALIERO</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "20px" }}>
+            {[
+              { v: "~860", l: "Chiamate totali al giorno", sub: `${fmt(T)} in 25 giorni` },
+              { v: "~427", l: "Il bot ha lavorato", hi: true, sub: "240 gestite + 187 parziali" },
+              { v: "49,5%", l: "Tasso di intervento bot", hi: true, sub: "27,9% + 21,6%" },
+              { v: "~2,3", l: "FTE totali equivalenti", hi: true, sub: "1,5 + 0,8 FTE" },
+            ].map((m, i) => (
+              <div key={i} style={{ background: "rgba(255,255,255,0.15)", borderRadius: "10px", padding: "14px 16px" }}>
+                <div style={{ fontSize: "22px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: m.hi ? orange : white }}>{m.v}</div>
+                <div style={{ fontSize: "12px", opacity: 0.7, marginTop: "4px" }}>{m.l}</div>
+                {m.sub && <div style={{ fontSize: "10px", opacity: 0.5, marginTop: "2px" }}>{m.sub}</div>}
+              </div>
+            ))}
+          </div>
+
+          {/* Row 2: Gestite senza operatore — compatta */}
+          <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.4, marginBottom: "5px", letterSpacing: "0.5px" }}>GESTITE SENZA OPERATORE (27,9%)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: "12px" }}>
             {[
               { v: "~240", l: "Al giorno", sub: "6.019 in 25 giorni" },
               { v: "~12h", l: "Ore risparmiate al giorno", hi: true, sub: "stima 3 min/chiamata" },
               { v: "~1,5", l: "FTE equivalenti", hi: true, sub: "operatori a tempo pieno" },
               { v: "79,4%", l: "Risposte pertinenti", hi: true },
             ].map((m, i) => (
-              <div key={i} style={{ background: "rgba(255,255,255,0.1)", borderRadius: "10px", padding: "14px 16px" }}>
-                <div style={{ fontSize: "22px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: m.hi ? orange : white }}>{m.v}</div>
-                <div style={{ fontSize: "12px", opacity: 0.7, marginTop: "4px" }}>{m.l}</div>
-                {m.sub && <div style={{ fontSize: "10px", opacity: 0.5, marginTop: "2px" }}>{m.sub}</div>}
+              <div key={i} style={{ background: "rgba(255,255,255,0.07)", borderRadius: "8px", padding: "10px 12px" }}>
+                <div style={{ fontSize: "17px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: m.hi ? orange : white }}>{m.v}</div>
+                <div style={{ fontSize: "11px", opacity: 0.6, marginTop: "3px" }}>{m.l}</div>
+                {m.sub && <div style={{ fontSize: "9px", opacity: 0.4, marginTop: "2px" }}>{m.sub}</div>}
               </div>
             ))}
           </div>
 
-          {/* Row 2: Bot ha risposto, utente ha chiesto operatore */}
-          <div style={{ fontSize: "11px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.5, marginBottom: "6px", letterSpacing: "0.5px" }}>BOT HA RISPOSTO, UTENTE HA CHIESTO L'OPERATORE (23,9%)</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "16px" }}>
+          {/* Row 3: Bot ha risposto, utente ha chiesto operatore — compatta */}
+          <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.4, marginBottom: "5px", letterSpacing: "0.5px" }}>BOT HA RISPOSTO, UTENTE HA CHIESTO L'OPERATORE (21,6%)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
             {[
-              { v: "~207", l: "Al giorno", sub: "5.170 in 25 giorni" },
-              { v: "~6,9h", l: "Ore di interazione bot/giorno", hi: true, sub: "stima 2 min/chiamata" },
-              { v: "~0,9", l: "FTE equivalenti", hi: true, sub: "operatori a tempo pieno" },
+              { v: "~187", l: "Al giorno", sub: "4.665 in 25 giorni" },
+              { v: "~6,2h", l: "Ore di interazione bot/giorno", hi: true, sub: "stima 2 min/chiamata" },
+              { v: "~0,8", l: "FTE equivalenti", hi: true, sub: "operatori a tempo pieno" },
               { v: "90,4%", l: "Risposte pertinenti", hi: true, sub: "su 2.782 valutate" },
             ].map((m, i) => (
-              <div key={i} style={{ background: "rgba(255,255,255,0.08)", borderRadius: "10px", padding: "14px 16px", borderLeft: `3px solid ${orange}` }}>
-                <div style={{ fontSize: "22px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: m.hi ? orange : white }}>{m.v}</div>
-                <div style={{ fontSize: "12px", opacity: 0.7, marginTop: "4px" }}>{m.l}</div>
-                {m.sub && <div style={{ fontSize: "10px", opacity: 0.5, marginTop: "2px" }}>{m.sub}</div>}
-              </div>
-            ))}
-          </div>
-
-          {/* Row 3: Totale */}
-          <div style={{ fontSize: "11px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.5, marginBottom: "6px", letterSpacing: "0.5px" }}>RIEPILOGO GIORNALIERO</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
-            {[
-              { v: "~860", l: "Chiamate totali al giorno", sub: `${fmt(T)} in 25 giorni` },
-              { v: "~447", l: "Il bot ha lavorato", hi: true, sub: "240 gestite + 207 parziali" },
-              { v: "51,8%", l: "Tasso di intervento bot", hi: true, sub: "27,9% + 23,9%" },
-              { v: "~2,4", l: "FTE totali equivalenti", hi: true, sub: "1,5 + 0,9 FTE" },
-            ].map((m, i) => (
-              <div key={i} style={{ background: "rgba(255,255,255,0.15)", borderRadius: "10px", padding: "14px 16px" }}>
-                <div style={{ fontSize: "22px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: m.hi ? orange : white }}>{m.v}</div>
-                <div style={{ fontSize: "12px", opacity: 0.7, marginTop: "4px" }}>{m.l}</div>
-                {m.sub && <div style={{ fontSize: "10px", opacity: 0.5, marginTop: "2px" }}>{m.sub}</div>}
+              <div key={i} style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "10px 12px", borderLeft: `2px solid ${orange}` }}>
+                <div style={{ fontSize: "17px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: m.hi ? orange : white }}>{m.v}</div>
+                <div style={{ fontSize: "11px", opacity: 0.6, marginTop: "3px" }}>{m.l}</div>
+                {m.sub && <div style={{ fontSize: "9px", opacity: 0.4, marginTop: "2px" }}>{m.sub}</div>}
               </div>
             ))}
           </div>
@@ -539,8 +539,8 @@ export default function App() {
 
           <div style={{ display: "flex", height: "44px", borderRadius: "10px", overflow: "hidden", marginBottom: "12px", border: `1px solid ${paleNavy}` }}>
             <div style={{ width: "27.9%", background: navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: "12px", fontWeight: 600, color: white }}>27,9%</span></div>
-            <div style={{ width: "23.9%", background: orange, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: "11px", fontWeight: 600, color: white }}>23,9%</span></div>
-            <div style={{ width: "46.9%", background: paleNavy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: "12px", fontWeight: 600, color: textMid }}>46,9%</span></div>
+            <div style={{ width: "21.6%", background: orange, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: "11px", fontWeight: 600, color: white }}>21,6%</span></div>
+            <div style={{ width: "49.2%", background: paleNavy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: "12px", fontWeight: 600, color: textMid }}>49,2%</span></div>
           </div>
           <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "1.25rem" }}>
             {[{ c: navy, l: "Gestite interamente dal bot" }, { c: orange, l: "Bot ha risposto, utente sceglie operatore" }, { c: paleNavy, l: "Il bot non è stato interpellato", border: true }].map((lg, i) => (
@@ -555,8 +555,8 @@ export default function App() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "12px", marginBottom: "1.25rem" }}>
             {[
               { val: 6019, title: "Gestite interamente dal bot", desc: "Il bot ha risposto dall'inizio alla fine. Nessun operatore necessario.", sub: `${fmt(1898)} chiuse dal bot · ${fmt(4121)} chiuse dall'utente`, c: navy, dd: "100" },
-              { val: 5170, title: "Bot ha risposto, utente ha chiesto l'operatore", desc: "Il bot ha interagito con l'utente — fornendo informazioni o tentando di rispondere — ma l'utente ha chiesto comunque di parlare con un operatore.", sub: `${fmt(2938)} scelta utente · ${fmt(1333)} info mancanti · ${fmt(899)} incomprensioni`, c: orange, dd: "50" },
-              { val: 10136, title: "Il bot non è stato interpellato", desc: "L'utente ha chiesto l'operatore al primo turno, senza dare al bot la possibilità di rispondere.", sub: `${fmt(10136)} richieste operatore al 1° turno`, c: textLight, dd: "0" },
+              { val: 4665, title: "Bot ha risposto, utente ha chiesto l'operatore", desc: "Il bot ha interagito con l'utente — fornendo informazioni o tentando di rispondere — ma l'utente ha chiesto comunque di parlare con un operatore.", sub: `${fmt(3037)} scelta utente · ${fmt(1215)} info mancanti · ${fmt(413)} incomprensioni`, c: orange, dd: "50" },
+              { val: 10629, title: "Il bot non è stato interpellato", desc: "L'utente ha chiesto l'operatore al primo turno, senza dare al bot la possibilità di rispondere.", sub: `${fmt(10629)} richieste operatore al 1° turno`, c: textLight, dd: "0" },
             ].map((card, i) => (
               <div key={i} style={{ background: white, border: `1px solid ${paleNavy}`, borderRadius: "12px", padding: "1.25rem", borderLeft: `5px solid ${card.c}` }}>
                 <div style={{ fontSize: "26px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: card.c }}>{fmt(card.val)}</div>
@@ -634,15 +634,15 @@ export default function App() {
           {/* ═══ DEEP DIVE: 50% GESTITE ═══ */}
           {deepDive === "50" && (
             <div style={{ border: `2px solid ${orange}`, borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem", background: `${paleOrange}40` }}>
-              <h3 style={{ fontSize: "16px", fontWeight: 600, color: orange, margin: "0 0 6px" }}>Approfondimento: {fmt(5170)} conversazioni dove il bot ha interagito</h3>
+              <h3 style={{ fontSize: "16px", fontWeight: 600, color: orange, margin: "0 0 6px" }}>Approfondimento: {fmt(4665)} conversazioni dove il bot ha interagito</h3>
               <p style={{ fontSize: "13px", color: textMid, margin: "0 0 1.25rem", lineHeight: 1.6 }}>
-                In queste conversazioni il bot ha risposto alle richieste dell'utente o ha tentato di farlo, ma l'utente ha chiesto comunque di parlare con un operatore. I motivi sono diversi: in {fmt(2938)} casi l'utente ha scelto volontariamente l'operatore dopo aver ricevuto risposta, in {fmt(1333)} il bot non aveva l'informazione nella knowledge base, e in {fmt(899)} il bot non ha capito la richiesta.
+                In queste conversazioni il bot ha risposto alle richieste dell'utente o ha tentato di farlo, ma l'utente ha chiesto comunque di parlare con un operatore. I motivi sono diversi: in {fmt(3037)} casi l'utente ha scelto volontariamente l'operatore dopo aver ricevuto risposta, in {fmt(1215)} il bot non aveva l'informazione nella knowledge base, e in {fmt(413)} il bot non ha capito la richiesta.
               </p>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "10px", marginBottom: "1.25rem" }}>
-                <Metric value={fmt(2938)} label="Scelta utente dopo risposta" sub="Il bot ha risposto correttamente" />
-                <Metric value={fmt(1333)} label="Info mancanti nella KB" sub="Il bot ha capito ma non aveva la risposta" />
-                <Metric value={fmt(899)} label="Incomprensioni linguistiche" sub="Il bot non ha capito la richiesta" />
+                <Metric value={fmt(3037)} label="Scelta utente dopo risposta" sub="Il bot ha risposto correttamente" />
+                <Metric value={fmt(1215)} label="Info mancanti nella KB" sub="Il bot ha capito ma non aveva la risposta" />
+                <Metric value={fmt(413)} label="Incomprensioni linguistiche" sub="Il bot non ha capito la richiesta" />
                 <Metric value="90,4%" label="Risposte pertinenti" sub={`Su ${fmt(2782)} valutate (scelta utente)`} />
               </div>
 
@@ -677,9 +677,9 @@ export default function App() {
                 <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "12px" }}>Perché l'utente chiede l'operatore dopo la risposta del bot</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "10px" }}>
                   {[
-                    { v: fmt(2718), l: "Richiesta diretta", pct: "92,5%", desc: "L'utente vuole parlare con una persona" },
-                    { v: fmt(93), l: "Conferma umana", pct: "3,2%", desc: "Vuole conferma di ciò che ha detto il bot" },
-                    { v: fmt(84), l: "Persona specifica", pct: "2,9%", desc: "Chiede una persona per nome" },
+                    { v: fmt(2810), l: "Richiesta diretta", pct: "92,5%", desc: "L'utente vuole parlare con una persona" },
+                    { v: fmt(97), l: "Conferma umana", pct: "3,2%", desc: "Vuole conferma di ciò che ha detto il bot" },
+                    { v: fmt(87), l: "Persona specifica", pct: "2,9%", desc: "Chiede una persona per nome" },
                   ].map((m, i) => (
                     <div key={i} style={{ background: paleNavy, borderRadius: "8px", padding: "12px" }}>
                       <div style={{ fontSize: "20px", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", color: navy }}>{m.v}</div>
@@ -707,21 +707,21 @@ export default function App() {
           {/* ═══ DEEP DIVE: 0% GESTITE ═══ */}
           {deepDive === "0" && (
             <div style={{ border: `2px solid ${textLight}`, borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem", background: `${paleNavy}40` }}>
-              <h3 style={{ fontSize: "16px", fontWeight: 600, color: navy, margin: "0 0 6px" }}>Approfondimento: {fmt(10136)} conversazioni — operatore al primo turno</h3>
+              <h3 style={{ fontSize: "16px", fontWeight: 600, color: navy, margin: "0 0 6px" }}>Approfondimento: {fmt(10629)} conversazioni — operatore al primo turno</h3>
               <p style={{ fontSize: "13px", color: textMid, margin: "0 0 1.25rem", lineHeight: 1.6 }}>
                 In queste conversazioni l'utente ha chiesto immediatamente di parlare con un operatore, senza dare al bot nessuna possibilità di rispondere. Non è un limite del bot — è una scelta dell'utente.
               </p>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "10px", marginBottom: "1.25rem" }}>
-                <Metric value={fmt(10136)} label="Totale richieste al 1° turno" sub={`${pct(10136, T)}% di tutte le conversazioni`} />
-                <Metric value={fmt(Math.round(10136/25))} label="Al giorno" sub="Media su 25 giorni" />
+                <Metric value={fmt(10629)} label="Totale richieste al 1° turno" sub={`${pct(10629, T)}% di tutte le conversazioni`} />
+                <Metric value={fmt(Math.round(10629/25))} label="Al giorno" sub="Media su 25 giorni" />
                 <Metric value="0 turni" label="Interazione col bot" sub="Nessuna opportunità di risposta" />
               </div>
 
               {/* Sub-section: immediate */}
               <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "10px", padding: "1.25rem", marginBottom: "1.25rem", background: white }}>
                 <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "4px" }}>Operatore al primo turno: perché lo chiedono</div>
-                <div style={{ fontSize: "12px", color: textLight, marginBottom: "14px" }}>{fmt(10136)} conversazioni — l'utente non ha interagito col bot</div>
+                <div style={{ fontSize: "12px", color: textLight, marginBottom: "14px" }}>{fmt(10629)} conversazioni — l'utente non ha interagito col bot</div>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={catImmIntents} layout="vertical" margin={{ left: 10, right: 16 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={paleNavy} horizontal={false} />
@@ -742,14 +742,14 @@ export default function App() {
               ]} />
 
               <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: navy, lineHeight: 1.6, borderLeft: `4px solid ${textLight}` }}>
-                <strong>Queste {fmt(10136)} chiamate rappresentano il 46,9% del totale.</strong> L'utente decide di parlare con un operatore prima ancora di sapere cosa può fare il bot. Migliorare il messaggio di benvenuto e comunicare le capacità del voicebot è il modo più diretto per ridurre questa percentuale.
+                <strong>Queste {fmt(10629)} chiamate rappresentano il 49,2% del totale.</strong> L'utente decide di parlare con un operatore prima ancora di sapere cosa può fare il bot. Migliorare il messaggio di benvenuto e comunicare le capacità del voicebot è il modo più diretto per ridurre questa percentuale.
               </div>
             </div>
           )}
 
           {/* Insight box after cards/deep-dives */}
           <div style={{ background: paleNavy, borderRadius: "10px", padding: "1rem 1.25rem", fontSize: "13px", color: navy, lineHeight: 1.6, borderLeft: `4px solid ${navy}` }}>
-            <strong>Lettura chiave:</strong> nelle prime due categorie il bot ha effettivamente lavorato — ha risposto o tentato di rispondere. Questo avviene nel <strong>51,8% delle chiamate</strong> ({fmt(6019 + 5170)} su {fmt(T)}). Nella terza, {fmt(10136)} sono utenti che chiedono l'operatore come prima cosa: non è un limite del bot, è una scelta del cliente.
+            <strong>Lettura chiave:</strong> nelle prime due categorie il bot ha effettivamente lavorato — ha risposto o tentato di rispondere. Questo avviene nel <strong>49,5% delle chiamate</strong> ({fmt(6019 + 4665)} su {fmt(T)}). Nella terza, {fmt(10629)} sono utenti che chiedono l'operatore come prima cosa: non è un limite del bot, è una scelta del cliente.
           </div>
 
           {/* Abandonment note */}
@@ -835,16 +835,16 @@ export default function App() {
         <div style={{ marginBottom: "3rem" }}>
           <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>3. Dove si può migliorare</h2>
           <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>
-            I limiti reali del sistema sono le informazioni mancanti e le incomprensioni. Insieme rappresentano il <strong style={{ color: navy }}>{pct(1333 + 899, T)}%</strong> del totale.
+            I limiti reali del sistema sono le informazioni mancanti e le incomprensioni. Insieme rappresentano il <strong style={{ color: navy }}>{pct(1215 + 413, T)}%</strong> del totale.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "1.5rem" }}>
             <div style={{ background: white, border: `1px solid ${paleNavy}`, borderRadius: "12px", padding: "1.25rem", borderLeft: `5px solid ${red}` }}>
-              <div style={{ fontSize: "26px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: red }}>{fmt(1333)}</div>
+              <div style={{ fontSize: "26px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: red }}>{fmt(1215)}</div>
               <div style={{ fontSize: "14px", fontWeight: 600, margin: "6px 0 8px" }}>Informazioni mancanti</div>
               <div style={{ fontSize: "13px", color: textMid, lineHeight: 1.5 }}>Il bot ha capito la domanda ma non aveva la risposta. Si risolve arricchendo il catalogo nella knowledge base.</div>
             </div>
             <div style={{ background: white, border: `1px solid ${paleNavy}`, borderRadius: "12px", padding: "1.25rem", borderLeft: `5px solid ${orange}` }}>
-              <div style={{ fontSize: "26px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: orange }}>{fmt(899)}</div>
+              <div style={{ fontSize: "26px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: orange }}>{fmt(413)}</div>
               <div style={{ fontSize: "14px", fontWeight: 600, margin: "6px 0 8px" }}>Incomprensioni linguistiche</div>
               <div style={{ fontSize: "13px", color: textMid, lineHeight: 1.5 }}>Il bot non ha capito l'utente. Spesso codici modello o pronunce non standard.</div>
             </div>
@@ -876,7 +876,7 @@ export default function App() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "12px", marginBottom: "1.5rem" }}>
             <Metric value={fmt(2203)} label="Conversazioni con incomprensioni" sub={`${pct(2203, T)}% del totale`} />
             <Metric value={fmt(1072)} label="Gestite comunque dal bot" sub="Il bot si è ripreso" />
-            <Metric value={fmt(899)} label="Trasferite per incomprensione" sub="Il bot non è riuscito" />
+            <Metric value={fmt(413)} label="Trasferite per incomprensione" sub="Il bot non è riuscito" />
             <Metric value={fmt(269)} label="Con 3+ incomprensioni consecutive" sub="Trasferimento forzato" />
           </div>
 
@@ -993,9 +993,9 @@ export default function App() {
           <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>5. Le domande per voi</h2>
           <p style={{ fontSize: "14px", color: textMid, lineHeight: 1.7, margin: "0 0 1.25rem" }}>Il voicebot funziona e risponde ai vostri clienti. Il passo successivo è decidere insieme come gestire tre situazioni specifiche.</p>
           {[
-            { letter: "A", q: "Quando il cliente chiede subito l'operatore", ctx: `Succede nel 46,9% delle chiamate (${fmt(10136)}). L'utente non dà al bot la possibilità di rispondere.`, opt: "Il bot deve trasferire subito? Oppure chiedere prima il motivo della chiamata e provare a rispondere?", c: navy },
-            { letter: "B", q: "Quando il bot risponde ma il cliente vuole comunque l'operatore", ctx: `Succede in ${fmt(2938)} chiamate. Il bot ha dato le informazioni (nel 90% dei casi in modo pertinente), ma il cliente preferisce conferma umana.`, opt: "Il bot deve trasferire? Proporre una richiamata? Chiedere se serve qualcos'altro?", c: orange },
-            { letter: "C", q: "Quando il bot non ha l'informazione richiesta", ctx: `Succede in ${fmt(1333)} chiamate. Il bot capisce la domanda ma non trova la risposta.`, opt: "Il bot deve trasferire direttamente? Suggerire il sito web? Proporre il contatto via email?", c: red },
+            { letter: "A", q: "Quando il cliente chiede subito l'operatore", ctx: `Succede nel 49,2% delle chiamate (${fmt(10629)}). L'utente non dà al bot la possibilità di rispondere.`, opt: "Il bot deve trasferire subito? Oppure chiedere prima il motivo della chiamata e provare a rispondere?", c: navy },
+            { letter: "B", q: "Quando il bot risponde ma il cliente vuole comunque l'operatore", ctx: `Succede in ${fmt(3037)} chiamate. Il bot ha dato le informazioni (nel 90% dei casi in modo pertinente), ma il cliente preferisce conferma umana.`, opt: "Il bot deve trasferire? Proporre una richiamata? Chiedere se serve qualcos'altro?", c: orange },
+            { letter: "C", q: "Quando il bot non ha l'informazione richiesta", ctx: `Succede in ${fmt(1215)} chiamate. Il bot capisce la domanda ma non trova la risposta.`, opt: "Il bot deve trasferire direttamente? Suggerire il sito web? Proporre il contatto via email?", c: red },
           ].map((s, i) => (
             <div key={i} style={{ background: white, border: `1px solid ${paleNavy}`, borderRadius: "12px", padding: "1.25rem", marginBottom: "12px", borderLeft: `5px solid ${s.c}` }}>
               <div style={{ display: "flex", gap: "16px" }}>
@@ -1097,12 +1097,12 @@ export default function App() {
           </div>
 
           {/* Row 2: Bot ha risposto, utente ha chiesto operatore */}
-          <div style={{ fontSize: "12px", fontWeight: 600, color: orange, marginBottom: "6px" }}>Bot ha risposto, utente ha chiesto l'operatore (23,9%)</div>
+          <div style={{ fontSize: "12px", fontWeight: 600, color: orange, marginBottom: "6px" }}>Bot ha risposto, utente ha chiesto l'operatore (21,6%)</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "12px", marginBottom: "1.25rem" }}>
-            <Metric value="~207" label="Chiamate/giorno" sub="5.170 in 25 giorni" />
-            <Metric value="~414 min" label="Minuti di interazione bot" sub="207 × 2 min" />
-            <Metric value="~6,9h" label="Ore di interazione bot/giorno" sub="tempo gestito dal bot" />
-            <Metric value="~0,9 FTE" label="Operatori equivalenti" sub="su turno 8h" />
+            <Metric value="~187" label="Chiamate/giorno" sub="4.665 in 25 giorni" />
+            <Metric value="~374 min" label="Minuti di interazione bot" sub="187 × 2 min" />
+            <Metric value="~6,2h" label="Ore di interazione bot/giorno" sub="tempo gestito dal bot" />
+            <Metric value="~0,8 FTE" label="Operatori equivalenti" sub="su turno 8h" />
           </div>
 
           {/* Row 3: Totale */}
@@ -1110,10 +1110,10 @@ export default function App() {
             <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "12px" }}>Impatto operativo totale</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "12px" }}>
               {[
-                { v: "~447", l: "Chiamate gestite dal bot/giorno", sub: "240 + 207" },
-                { v: "~1.134 min", l: "Minuti totali/giorno", sub: "720 + 414" },
-                { v: "~18,9h", l: "Ore totali/giorno", sub: "12h + 6,9h" },
-                { v: "~2,4 FTE", l: "Operatori equivalenti totali", sub: "1,5 + 0,9" },
+                { v: "~427", l: "Chiamate gestite dal bot/giorno", sub: "240 + 187" },
+                { v: "~1.094 min", l: "Minuti totali/giorno", sub: "720 + 374" },
+                { v: "~18,2h", l: "Ore totali/giorno", sub: "12h + 6,2h" },
+                { v: "~2,3 FTE", l: "Operatori equivalenti totali", sub: "1,5 + 0,8" },
               ].map((m, i) => (
                 <div key={i} style={{ background: white, borderRadius: "8px", padding: "12px" }}>
                   <div style={{ fontSize: "20px", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", color: navy }}>{m.v}</div>
@@ -1282,7 +1282,7 @@ export default function App() {
           <h2 style={{ fontSize: "18px", fontWeight: 600, margin: "0 0 8px", color: navy }}>9. Piano operativo</h2>
           <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "12px", overflow: "hidden" }}>
             {[
-              { n: "01", t: "Arricchire la knowledge base", d: `Aggiungere informazioni sui prodotti più richiesti. Può risolvere una parte significativa delle ${fmt(1333)} chiamate senza risposta.`, tag: "Priorità alta", c: red },
+              { n: "01", t: "Arricchire la knowledge base", d: `Aggiungere informazioni sui prodotti più richiesti. Può risolvere una parte significativa delle ${fmt(1215)} chiamate senza risposta.`, tag: "Priorità alta", c: red },
               { n: "02", t: "Implementare Smart RAG + Tool Routing", d: "Introdurre orchestrazione intelligente con routing, recupero mirato dalla KB e tool calling per ridurre drasticamente il consumo di token e i costi operativi.", tag: "Priorità alta", c: red },
               { n: "03", t: "Attivare strategia soft + asincrona (livelli 1+4)", d: "Dissuasione gentile del trasferimento e gestione asincrona delle richieste. Il primo passo per ridurre i trasferimenti non necessari.", tag: "Priorità alta", c: orange },
               { n: "04", t: "Affinare la pertinenza delle risposte", d: "Il 9,6% delle risposte valutate non è pertinente. Migliorando prompt e matching si può alzare la qualità.", tag: "Priorità media", c: orange },

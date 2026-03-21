@@ -496,12 +496,11 @@ export default function App() {
 
           {/* Row 2: Gestite senza operatore — compatta */}
           <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.4, marginBottom: "5px", letterSpacing: "0.5px" }}>CONVERSAZIONI GESTITE AUTONOMAMENTE DALL'AI</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: "12px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginBottom: "12px" }}>
             {[
               { v: "~240", l: "Al giorno", sub: "6.019 in 25 giorni" },
               { v: "~12h", l: "Ore risparmiate al giorno", hi: true, sub: "stima 3 min/chiamata" },
               { v: "~1,5", l: "FTE equivalenti", hi: true, sub: "operatori a tempo pieno" },
-              { v: "79,4%", l: "Risposte pertinenti", hi: true },
             ].map((m, i) => (
               <div key={i} style={{ background: "rgba(255,255,255,0.07)", borderRadius: "8px", padding: "10px 12px" }}>
                 <div style={{ fontSize: "17px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: m.hi ? orange : white }}>{m.v}</div>
@@ -513,12 +512,11 @@ export default function App() {
 
           {/* Row 3: Bot ha risposto, utente ha chiesto operatore — compatta */}
           <div style={{ fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", opacity: 0.4, marginBottom: "5px", letterSpacing: "0.5px" }}>CONVERSAZIONI GESTITE DALL'AI CON RICHIESTA DI PASSAGGIO AL PUNTO VENDITA</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
             {[
               { v: "~187", l: "Al giorno", sub: "4.665 in 25 giorni" },
               { v: "~6,2h", l: "Ore di interazione bot/giorno", hi: true, sub: "stima 2 min/chiamata" },
               { v: "~0,8", l: "FTE equivalenti", hi: true, sub: "operatori a tempo pieno" },
-              { v: "90,4%", l: "Risposte pertinenti", hi: true, sub: "su 2.782 valutate" },
             ].map((m, i) => (
               <div key={i} style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "10px 12px", borderLeft: `2px solid ${orange}` }}>
                 <div style={{ fontSize: "17px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: m.hi ? orange : white }}>{m.v}</div>
@@ -1146,6 +1144,20 @@ export default function App() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* TTS cost impact block */}
+          <div style={{ border: `2px solid ${red}`, borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem", background: `${red}08`, display: "flex", gap: "20px", alignItems: "center" }}>
+            <div style={{ minWidth: "80px", textAlign: "center" }}>
+              <div style={{ fontSize: "42px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: red, lineHeight: 1 }}>7x</div>
+              <div style={{ fontSize: "11px", color: red, fontWeight: 600, marginTop: "4px" }}>maggiorazione</div>
+            </div>
+            <div style={{ borderLeft: `2px solid ${red}30`, paddingLeft: "20px" }}>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "6px" }}>Impatto del cambio voci TTS sui costi</div>
+              <div style={{ fontSize: "13px", color: textMid, lineHeight: 1.6 }}>
+                Rispetto alle voci di sintesi vocale inizialmente previste, sono state selezionate voci di nuova generazione con qualità significativamente superiore (più naturali, più espressive, migliore prosodia). Questa scelta ha comportato una <strong style={{ color: red }}>maggiorazione dei costi TTS di 7 volte</strong> rispetto alla configurazione iniziale. La qualità dell'esperienza vocale è nettamente migliorata, ma il costo per minuto di sintesi è proporzionalmente più alto.
+              </div>
+            </div>
           </div>
 
           <div style={{ border: `1px solid ${orange}40`, borderRadius: "12px", overflow: "hidden", marginBottom: "1.5rem" }}>

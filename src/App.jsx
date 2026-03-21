@@ -1132,7 +1132,6 @@ export default function App() {
           <div style={{ border: `1px solid ${paleNavy}`, borderRadius: "12px", overflow: "hidden", marginBottom: "1.5rem" }}>
             <div style={{ background: navy, color: white, padding: "14px 20px", fontSize: "14px", fontWeight: 600 }}>Situazione attuale</div>
             {[
-              { icon: "📊", t: "Stima iniziale molto contenuta", d: "La stima iniziale del consumo di token era basata su una base dati (catalogo aziendale) significativamente più piccola rispetto a quella effettivamente caricata. Il volume reale di dati da processare ha superato le previsioni iniziali." },
               { icon: "🔄", t: "Interazione su più temi", d: "Il voicebot gestisce argomenti molto diversi tra loro — disponibilità, ordini, prezzi, assistenza, informazioni negozio — che sono stati introdotti gradualmente. Ogni tema aggiuntivo aumenta il contesto che il modello deve processare ad ogni turno." },
               { icon: "🗣️", t: "Scelta di voci di livello superiore", d: "Le voci di sintesi vocale selezionate per il voicebot sono di qualità premium, offrendo un'esperienza più naturale all'utente ma con un costo unitario più alto." },
             ].map((item, i) => (
@@ -1234,7 +1233,7 @@ export default function App() {
                 <div style={{ fontSize: "13px", fontWeight: 600, color: navy, marginBottom: "8px" }}>Impatto atteso</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   {[
-                    { t: "Riduzione drastica del consumo di token", d: "meno contesto + meno uso del modello quando non necessario" },
+                    { t: "Riduzione del consumo di token", d: "meno contesto + meno uso del modello quando non necessario" },
                     { t: "Ottimizzazione dei costi operativi", d: "le attività vengono gestite senza passare dal modello generativo" },
                     { t: "Maggiore velocità di risposta", d: "routing leggero + contesto ridotto" },
                     { t: "Qualità delle risposte invariata o migliorata", d: "grazie a retrieval mirato e vincoli sul modello" },

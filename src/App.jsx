@@ -1159,6 +1159,20 @@ export default function App() {
             </div>
           </div>
 
+          {/* RAG chunks impact block */}
+          <div style={{ border: `2px solid ${orange}`, borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem", background: `${orange}08`, display: "flex", gap: "20px", alignItems: "center" }}>
+            <div style={{ minWidth: "80px", textAlign: "center" }}>
+              <div style={{ fontSize: "42px", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: orange, lineHeight: 1 }}>3→9</div>
+              <div style={{ fontSize: "11px", color: orange, fontWeight: 600, marginTop: "4px" }}>chunks RAG</div>
+            </div>
+            <div style={{ borderLeft: `2px solid ${orange}30`, paddingLeft: "20px" }}>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: navy, marginBottom: "6px" }}>Triplicazione dei chunks di ricerca per la qualità delle risposte</div>
+              <div style={{ fontSize: "13px", color: textMid, lineHeight: 1.6 }}>
+                Il catalogo Euronics contiene <strong style={{ color: navy }}>22.527 prodotti</strong> con un'alta concentrazione di termini ricorrenti: "iPhone" compare in 1.612 prodotti (tra 38 modelli diversi + 618 accessori generici), "Samsung" in 1.207, "cover" in 1.404, "smartphone" in 1.200. Con soli 3 chunks, la ricerca RAG restituiva spesso risultati non pertinenti — ad esempio, un utente che chiedeva l'iPhone 16 Pro poteva ricevere informazioni su una cover per iPhone 13. <strong style={{ color: orange }}>Portare i chunks da 3 a 9</strong> ha permesso al modello di trovare il prodotto corretto tra le molte varianti simili, ma ha <strong style={{ color: orange }}>triplicato il consumo di token</strong> per ogni ricerca nel catalogo.
+              </div>
+            </div>
+          </div>
+
           <div style={{ border: `1px solid ${orange}40`, borderRadius: "12px", overflow: "hidden", marginBottom: "1.5rem" }}>
             <div style={{ background: orange, color: white, padding: "14px 20px", fontSize: "14px", fontWeight: 600 }}>Proposta di ottimizzazione: Smart RAG + Tool Routing</div>
             <div style={{ padding: "1.25rem" }}>
